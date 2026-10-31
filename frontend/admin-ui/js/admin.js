@@ -102,7 +102,27 @@ const elements = {
   btnCloseReader: document.getElementById('btn-close-reader'),
   readerChapterTitle: document.getElementById('reader-chapter-title'),
   readerChapterMeta: document.getElementById('reader-chapter-meta'),
-  readerContentText: document.getElementById('reader-content-text')
+  readerContentText: document.getElementById('reader-content-text'),
+
+  // Feedback Management
+  navFeedbackCount: document.getElementById('nav-feedback-count'),
+  feedbackCountTotal: document.getElementById('feedback-count-total'),
+  feedbackCountErrors: document.getElementById('feedback-count-errors'),
+  feedbackCountRequests: document.getElementById('feedback-count-requests'),
+  feedbackCountFeatures: document.getElementById('feedback-count-features'),
+  feedbackTableBody: document.getElementById('feedback-table-body'),
+  feedbackTableInfo: document.getElementById('feedback-table-info'),
+  feedbackSearchInput: document.getElementById('feedback-search-input'),
+  filterFeedbackType: document.getElementById('filter-feedback-type'),
+  btnReloadFeedback: document.getElementById('btn-reload-feedback'),
+  feedbackDetailModal: document.getElementById('feedback-detail-modal'),
+  btnCloseFeedbackModal: document.getElementById('btn-close-feedback-modal'),
+  btnCloseFeedbackBtn: document.getElementById('btn-close-feedback-btn'),
+  btnModalDeleteFeedback: document.getElementById('btn-modal-delete-feedback'),
+  modalFeedbackMeta: document.getElementById('modal-feedback-meta'),
+  modalFeedbackAuthor: document.getElementById('modal-feedback-author'),
+  modalFeedbackTypeBadge: document.getElementById('modal-feedback-type-badge'),
+  modalFeedbackContent: document.getElementById('modal-feedback-content')
 };
 
 // Initialize
@@ -113,17 +133,20 @@ document.addEventListener('DOMContentLoaded', () => {
   initTabs();
   initEventListeners();
   loadAllData();
-  loadAffiliates();
 
-  // Auto-refresh stats and queue status every 2 seconds
-  setInterval(() => {
-    loadStats();
-    if (appState.activeTab === 'queue') {
-      loadQueue();
-    } else if (appState.activeTab === 'affiliate') {
-      loadAffiliates();
-    }
-  }, 2000);
+  // Auto-refresh stats and queue status every 2 seconds (disabled in headless automated tests)
+  if (!navigator.webdriver) {
+    setInterval(() => {
+      loadStats();
+      if (appState.activeTab === 'queue') {
+        loadQueue();
+      } else if (appState.activeTab === 'affiliate') {
+        loadAffiliates();
+      } else if (appState.activeTab === 'feedback') {
+        loadFeedback();
+      }
+    }, 2000);
+  }
 });
 
 // Tab Switching
@@ -132,9 +155,20 @@ function initTabs() {
     item.addEventListener('click', (e) => {
       e.preventDefault();
       const tabId = item.getAttribute('data-tab');
+      window.location.hash = tabId;
       switchTab(tabId);
     });
   });
+
+  window.addEventListener('hashchange', () => {
+    const hash = window.location.hash.replace('#', '').trim();
+    if (hash) switchTab(hash);
+  });
+
+  const initialHash = window.location.hash.replace('#', '').trim();
+  if (initialHash) {
+    switchTab(initialHash);
+  }
 }
 
 function switchTab(tabId) {
@@ -149,6 +183,8 @@ function switchTab(tabId) {
     queue: 'Hàng Đợi Cào Truyện (Crawl Queue)',
     novels: 'Kho Dữ Liệu Truyện Trong Database',
     sources: 'Quản Lý Nguồn Web & Lập Lịch Quét Hàng Ngày',
+    affiliate: 'Quản Lý Shopee Affiliate & Tiếp Thị Liên Kết',
+    feedback: 'Ý Kiến Người Dùng & Báo Lỗi Từ Độc Giả',
     database: 'Hạ Tầng & Sơ Đồ Cơ Sở Dữ Liệu'
   };
   elements.pageTitle.textContent = titles[tabId] || 'Dashboard Tổng Quan';
@@ -159,6 +195,10 @@ function switchTab(tabId) {
     loadNovels();
   } else if (tabId === 'sources') {
     loadSources();
+  } else if (tabId === 'affiliate') {
+    loadAffiliates();
+  } else if (tabId === 'feedback') {
+    loadFeedback();
   }
 }
 
@@ -266,10 +306,17 @@ function initEventListeners() {
 async function loadAllData() {
   await Promise.allSettled([
     loadStats(),
-    loadQueue(),
-    loadNovels(),
-    loadSources()
+    loadFeedback()
   ]);
+  if (appState.activeTab === 'novels' || appState.activeTab === 'overview') {
+    loadNovels();
+  }
+  if (appState.activeTab === 'queue' || appState.activeTab === 'overview') {
+    loadQueue();
+  }
+  if (appState.activeTab === 'sources') {
+    loadSources();
+  }
 }
 
 // Fetch Overview Stats
@@ -588,7 +635,7 @@ function renderNovelsTable(data) {
     return `
       <tr>
         <td>
-          <img src="${coverImg}" alt="${escapeHtml(n.title)}" class="novel-thumb" onerror="this.src='https://via.placeholder.com/60x85?text=No+Cover'">
+          <img src="${coverImg}" alt="${escapeHtml(n.title)}" class="novel-thumb" loading="lazy" onerror="this.src='https://via.placeholder.com/60x85?text=No+Cover'">
         </td>
         <td class="novel-title-cell">
           <strong>${escapeHtml(n.title)}</strong>
@@ -1039,3 +1086,236 @@ window.goToNovelsPage = function(p) {
   appState.currentPage = p;
   loadNovels();
 };
+
+/* ====================================================================
+   FEEDBACK & READER OPINIONS CONTROLLER (PHI THƯ TRUYỀN TIN)
+   ==================================================================== */
+let feedbackCache = [];
+let currentDetailFeedbackId = null;
+
+function getFeedbackBadgeHtml(type) {
+  const t = type || '';
+  if (t.includes('Báo lỗi')) {
+    return `<span class="badge-tag amber"><i class="fa-solid fa-triangle-exclamation"></i> Báo lỗi chương</span>`;
+  } else if (t.includes('Yêu cầu')) {
+    return `<span class="badge-tag cyan"><i class="fa-solid fa-book-medical"></i> Yêu cầu truyện</span>`;
+  } else if (t.includes('Góp ý')) {
+    return `<span class="badge-tag emerald"><i class="fa-solid fa-wand-magic-sparkles"></i> Góp ý giao diện</span>`;
+  } else if (t.includes('Tâm thư')) {
+    return `<span class="badge-tag violet"><i class="fa-solid fa-heart"></i> Tâm thư ủng hộ</span>`;
+  }
+  return `<span class="badge-tag"><i class="fa-solid fa-comment-dots"></i> ${escapeHtml(t || 'Ý kiến')}</span>`;
+}
+
+function formatFeedbackTime(dateStr) {
+  if (!dateStr) return '--';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${hours}:${minutes} ${day}/${month}/${year}`;
+}
+
+async function loadFeedback() {
+  const tbody = elements.feedbackTableBody;
+  try {
+    const res = await fetch(`${API_BASE}/admin/feedback`);
+    if (!res.ok) throw new Error('API Error');
+    const result = await res.json();
+    const list = Array.isArray(result) ? result : (result.data || []);
+
+    feedbackCache = list;
+
+    // Calculate metrics
+    const total = list.length;
+    let errorsCount = 0;
+    let requestsCount = 0;
+    let featuresCount = 0;
+
+    list.forEach(item => {
+      const t = item.feedback_type || '';
+      if (t.includes('Báo lỗi')) errorsCount++;
+      else if (t.includes('Yêu cầu')) requestsCount++;
+      else if (t.includes('Góp ý') || t.includes('Tâm thư')) featuresCount++;
+    });
+
+    if (elements.navFeedbackCount) elements.navFeedbackCount.textContent = total;
+    if (elements.feedbackCountTotal) elements.feedbackCountTotal.textContent = total;
+    if (elements.feedbackCountErrors) elements.feedbackCountErrors.textContent = errorsCount;
+    if (elements.feedbackCountRequests) elements.feedbackCountRequests.textContent = requestsCount;
+    if (elements.feedbackCountFeatures) elements.feedbackCountFeatures.textContent = featuresCount;
+
+    renderFeedbackTable();
+  } catch (err) {
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="5" style="color: #ef4444; padding: 24px; text-align: center;"><i class="fa-solid fa-circle-exclamation"></i> Lỗi kết nối tải ý kiến: ${err.message}</td></tr>`;
+    }
+  }
+}
+
+function renderFeedbackTable() {
+  const tbody = elements.feedbackTableBody;
+  if (!tbody) return;
+
+  const searchQuery = (elements.feedbackSearchInput ? elements.feedbackSearchInput.value : '').toLowerCase().trim();
+  const filterType = elements.filterFeedbackType ? elements.filterFeedbackType.value : '';
+
+  let filtered = feedbackCache.filter(item => {
+    if (filterType && !(item.feedback_type || '').includes(filterType)) return false;
+    if (searchQuery) {
+      const matchName = (item.name || '').toLowerCase().includes(searchQuery);
+      const matchContent = (item.content || '').toLowerCase().includes(searchQuery);
+      const matchContact = (item.contact || '').toLowerCase().includes(searchQuery);
+      if (!matchName && !matchContent && !matchContact) return false;
+    }
+    return true;
+  });
+
+  if (elements.feedbackTableInfo) {
+    elements.feedbackTableInfo.textContent = `Hiển thị ${filtered.length} / ${feedbackCache.length} ý kiến từ độc giả`;
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align: center; padding: 36px; color: var(--text-dim);">
+          <i class="fa-regular fa-comments" style="font-size: 2rem; margin-bottom: 10px; display: block; opacity: 0.5;"></i>
+          ${feedbackCache.length === 0 ? 'Chưa có phi thư truyền tin nào từ độc giả.' : 'Không tìm thấy ý kiến nào khớp với bộ lọc.'}
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(f => {
+    const rawContent = f.content || '';
+    const previewContent = rawContent.length > 95 ? rawContent.substring(0, 95) + '...' : rawContent;
+    const authorName = escapeHtml(f.name || 'Đạo hữu ẩn danh');
+    const contactInfo = f.contact ? `<div style="font-size: 0.76rem; color: var(--text-dim); margin-top: 3px;"><i class="fa-regular fa-id-badge"></i> ${escapeHtml(f.contact)}</div>` : '';
+
+    return `
+      <tr style="cursor: pointer;" onclick="if (!event.target.closest('button')) openFeedbackDetail('${f.id}')">
+        <td style="white-space: nowrap; font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">
+          <i class="fa-regular fa-clock" style="color: var(--cyan-primary); margin-right: 4px;"></i>${formatFeedbackTime(f.created_at)}
+        </td>
+        <td>
+          <strong style="color: var(--text-main); font-size: 0.9rem;">${authorName}</strong>
+          ${contactInfo}
+        </td>
+        <td>
+          ${getFeedbackBadgeHtml(f.feedback_type)}
+        </td>
+        <td>
+          <div style="color: #cbd5e1; font-size: 0.86rem; line-height: 1.5; word-break: break-word;" title="Nhấp để xem toàn văn">
+            ${escapeHtml(previewContent)}
+          </div>
+        </td>
+        <td style="text-align: right; white-space: nowrap;">
+          <button class="btn btn-secondary btn-sm" onclick="openFeedbackDetail('${f.id}')" title="Xem chi tiết" style="padding: 5px 10px; margin-right: 6px;">
+            <i class="fa-solid fa-eye"></i> Xem
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="deleteFeedback('${f.id}')" title="Xóa ý kiến" style="padding: 5px 10px; color: #ef4444; border-color: rgba(239,68,68,0.3);">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+window.openFeedbackDetail = function(id) {
+  const item = feedbackCache.find(f => f.id === id);
+  if (!item) return;
+
+  currentDetailFeedbackId = id;
+  if (elements.modalFeedbackMeta) {
+    elements.modalFeedbackMeta.textContent = `Thời gian gửi: ${formatFeedbackTime(item.created_at)} | ID: #${item.id.substring(0, 8)}`;
+  }
+  if (elements.modalFeedbackAuthor) {
+    let authorHtml = escapeHtml(item.name || 'Đạo hữu ẩn danh');
+    if (item.contact) {
+      authorHtml += ` <span style="font-weight: 400; font-size: 0.82rem; color: var(--text-dim);">(${escapeHtml(item.contact)})</span>`;
+    }
+    elements.modalFeedbackAuthor.innerHTML = authorHtml;
+  }
+  if (elements.modalFeedbackTypeBadge) {
+    elements.modalFeedbackTypeBadge.innerHTML = getFeedbackBadgeHtml(item.feedback_type);
+  }
+  if (elements.modalFeedbackContent) {
+    elements.modalFeedbackContent.textContent = item.content || '(Không có nội dung)';
+  }
+
+  if (elements.feedbackDetailModal) {
+    elements.feedbackDetailModal.classList.add('open');
+  }
+};
+
+window.closeFeedbackModal = function() {
+  if (elements.feedbackDetailModal) {
+    elements.feedbackDetailModal.classList.remove('open');
+  }
+  currentDetailFeedbackId = null;
+};
+
+window.deleteFeedback = async function(id) {
+  const targetId = id || currentDetailFeedbackId;
+  if (!targetId) return;
+
+  if (!confirm('Bạn có chắc chắn muốn xóa ý kiến / phi thư này?')) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/admin/feedback/${targetId}`, {
+      method: 'DELETE'
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'Lỗi khi xóa ý kiến');
+    }
+    closeFeedbackModal();
+    loadFeedback();
+  } catch (err) {
+    alert(`Lỗi xóa: ${err.message}`);
+  }
+};
+
+// Event listeners for feedback tab
+if (elements.feedbackSearchInput) {
+  let searchTimeout;
+  elements.feedbackSearchInput.addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(renderFeedbackTable, 200);
+  });
+}
+
+if (elements.filterFeedbackType) {
+  elements.filterFeedbackType.addEventListener('change', renderFeedbackTable);
+}
+
+if (elements.btnReloadFeedback) {
+  elements.btnReloadFeedback.addEventListener('click', () => {
+    elements.btnReloadFeedback.querySelector('i')?.classList.add('fa-spin');
+    loadFeedback().finally(() => {
+      setTimeout(() => elements.btnReloadFeedback.querySelector('i')?.classList.remove('fa-spin'), 500);
+    });
+  });
+}
+
+if (elements.btnCloseFeedbackModal) {
+  elements.btnCloseFeedbackModal.addEventListener('click', closeFeedbackModal);
+}
+if (elements.btnCloseFeedbackBtn) {
+  elements.btnCloseFeedbackBtn.addEventListener('click', closeFeedbackModal);
+}
+if (elements.btnModalDeleteFeedback) {
+  elements.btnModalDeleteFeedback.addEventListener('click', () => deleteFeedback(currentDetailFeedbackId));
+}
+
+window.addEventListener('click', (e) => {
+  if (e.target === elements.feedbackDetailModal) {
+    closeFeedbackModal();
+  }
+});
+

@@ -17,6 +17,7 @@ type Server struct {
 	sourceRepo    *storage.SourceRepository
 	affiliateRepo *storage.AffiliateRepository
 	userRepo      *storage.UserRepository
+	feedbackRepo  *storage.FeedbackRepository
 	engine        *crawler.Engine
 	scheduler     *scheduler.DailyScanner
 	registry      *crawler.HandlerRegistry
@@ -30,6 +31,7 @@ func NewServer(
 	sourceRepo *storage.SourceRepository,
 	affiliateRepo *storage.AffiliateRepository,
 	userRepo *storage.UserRepository,
+	feedbackRepo *storage.FeedbackRepository,
 	engine *crawler.Engine,
 	scheduler *scheduler.DailyScanner,
 	registry *crawler.HandlerRegistry,
@@ -47,6 +49,7 @@ func NewServer(
 		sourceRepo:    sourceRepo,
 		affiliateRepo: affiliateRepo,
 		userRepo:      userRepo,
+		feedbackRepo:  feedbackRepo,
 		engine:        engine,
 		scheduler:     scheduler,
 		registry:      registry,
@@ -123,6 +126,11 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("POST /api/auth/login", s.handleLogin)
 	s.mux.HandleFunc("GET /api/auth/me", s.handleGetMe)
 	s.mux.HandleFunc("POST /api/user/read-chapter", s.handleUserReadChapter)
+
+	// Feedback API (Phi Thư Truyền Tin)
+	s.mux.HandleFunc("POST /api/feedback", s.handleCreateFeedback)
+	s.mux.HandleFunc("GET /api/admin/feedback", s.handleGetFeedback)
+	s.mux.HandleFunc("DELETE /api/admin/feedback/{id}", s.handleDeleteFeedback)
 
 	// Static Admin UI Files
 	if s.adminUIDir != "" {

@@ -55,6 +55,11 @@
           <span>Shopee Affiliate</span>
           <span class="nav-pill green" id="nav-affiliate-count">0</span>
         </a>
+        <a href="#feedback" class="nav-item" data-tab="feedback">
+          <i class="fa-solid fa-comments"></i>
+          <span>Ý Kiến Người Dùng</span>
+          <span class="nav-pill violet" id="nav-feedback-count">0</span>
+        </a>
         <a href="#database" class="nav-item" data-tab="database">
           <i class="fa-solid fa-database"></i>
           <span>Hạ Tầng Database</span>
@@ -642,7 +647,101 @@
           </div>
         </section>
 
-        <!-- SECTION 6: DATABASE SCHEMAS & DETAILS -->
+        <!-- SECTION 6: USER FEEDBACK / PHI THƯ TRUYỀN TIN -->
+        <section class="tab-pane" id="pane-feedback">
+          <!-- Feedback Metrics -->
+          <div class="metrics-grid" style="margin-bottom: 24px;">
+            <div class="metric-card violet">
+              <div class="metric-icon"><i class="fa-solid fa-comments"></i></div>
+              <div class="metric-info">
+                <span class="metric-label">Tổng Ý Kiến Độc Giả</span>
+                <h3 class="metric-value" id="feedback-count-total">0</h3>
+                <span class="metric-hint">Phi thư truyền tin từ website</span>
+              </div>
+            </div>
+
+            <div class="metric-card amber">
+              <div class="metric-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <div class="metric-info">
+                <span class="metric-label">Báo Lỗi Chương / Nội Dung</span>
+                <h3 class="metric-value" id="feedback-count-errors">0</h3>
+                <span class="metric-hint">Mất chữ, lỗi font, trùng lặp</span>
+              </div>
+            </div>
+
+            <div class="metric-card cyan">
+              <div class="metric-icon"><i class="fa-solid fa-book-medical"></i></div>
+              <div class="metric-info">
+                <span class="metric-label">Yêu Cầu Truyện Mới</span>
+                <h3 class="metric-value" id="feedback-count-requests">0</h3>
+                <span class="metric-hint">Đề xuất bộ truyện mong muốn</span>
+              </div>
+            </div>
+
+            <div class="metric-card emerald">
+              <div class="metric-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+              <div class="metric-info">
+                <span class="metric-label">Góp Ý & Động Viên</span>
+                <h3 class="metric-value" id="feedback-count-features">0</h3>
+                <span class="metric-hint">Giao diện, tính năng, tâm thư</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div class="table-container-card">
+            <div class="table-toolbar">
+              <div class="panel-title">
+                <i class="fa-solid fa-inbox text-cyan"></i>
+                <h3 style="font-size: 1.05rem;">Danh Sách Phi Thư & Ý Kiến Đóng Góp</h3>
+              </div>
+              <div class="filter-actions">
+                <div class="search-box">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <input type="text" id="feedback-search-input" placeholder="Tìm người gửi, nội dung...">
+                </div>
+                <select id="filter-feedback-type" class="select-control" style="width: auto; min-width: 170px;">
+                  <option value="">Tất cả thể loại</option>
+                  <option value="Góp ý giao diện">Góp ý giao diện & tính năng</option>
+                  <option value="Báo lỗi chương">Báo lỗi chương / nội dung</option>
+                  <option value="Yêu cầu">Yêu cầu truyện mới</option>
+                  <option value="Tâm thư">Tâm thư ủng hộ</option>
+                  <option value="Ý kiến khác">Ý kiến khác</option>
+                </select>
+                <button class="btn btn-secondary btn-icon" id="btn-reload-feedback" title="Tải lại danh sách ý kiến">
+                  <i class="fa-solid fa-rotate-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th style="width: 160px;">Thời Gian Gửi</th>
+                    <th style="width: 180px;">Người Truyền Tin</th>
+                    <th style="width: 220px;">Loại Ý Kiến</th>
+                    <th>Lời Truyền Âm (Nội Dung)</th>
+                    <th style="text-align: right; width: 140px;">Hành Động</th>
+                  </tr>
+                </thead>
+                <tbody id="feedback-table-body">
+                  <tr>
+                    <td colspan="5" class="loading-row">
+                      <i class="fa-solid fa-circle-notch fa-spin"></i> Đang tải dữ liệu ý kiến từ độc giả...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="table-footer">
+              <span class="table-info" id="feedback-table-info">Hiển thị 0 ý kiến</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 7: DATABASE SCHEMAS & DETAILS -->
         <section class="tab-pane" id="pane-database">
           <div class="panel">
             <div class="panel-header">
@@ -816,6 +915,46 @@
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: FEEDBACK DETAIL VIEWER -->
+  <div class="modal-backdrop" id="feedback-detail-modal">
+    <div class="modal-dialog" style="max-width: 620px;">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <h2 id="modal-feedback-title"><i class="fa-solid fa-scroll text-cyan"></i> Chi Tiết Phi Thư Truyền Tin</h2>
+          <span class="modal-sub" id="modal-feedback-meta">Thời gian gửi: ...</span>
+        </div>
+        <button class="modal-close" id="btn-close-feedback-modal">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 24px;">
+        <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px 14px; flex: 1; min-width: 180px;">
+            <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">Người Truyền Tin</div>
+            <div id="modal-feedback-author" style="font-weight: 700; color: #fff; font-size: 0.95rem;">Đạo hữu ẩn danh</div>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 12px 14px; flex: 1; min-width: 180px;">
+            <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">Phân Loại Ý Kiến</div>
+            <div id="modal-feedback-type-badge">--</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 8px;">
+            <i class="fa-solid fa-feather-pointed text-cyan"></i> Lời Truyền Âm Đầy Đủ
+          </div>
+          <div id="modal-feedback-content" style="background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 18px; line-height: 1.7; color: var(--text-main); font-size: 0.92rem; white-space: pre-wrap; max-height: 320px; overflow-y: auto; user-select: text;">
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+          <button type="button" class="btn btn-secondary" id="btn-close-feedback-btn">Đóng</button>
+          <button type="button" class="btn btn-outline" id="btn-modal-delete-feedback" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.3);">
+            <i class="fa-solid fa-trash-can"></i> Xóa Ý Kiến Này
+          </button>
+        </div>
       </div>
     </div>
   </div>

@@ -1885,3 +1885,586 @@ html[data-theme="dark"] .book-detail__genres .genre:hover {
   color: #ffffff !important;
   border-color: var(--brand) !important;
 }
+
+
+/* =========================================================================
+   RESPONSIVE DONATE WIDGET (TO RA, KHÔNG CẦN TOGGLE, CHUẨN DESKTOP / TABLET / MOBILE)
+   ========================================================================= */
+.side-donate-widget {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(10px);
+  box-sizing: border-box;
+}
+
+html[data-theme="dark"] .side-donate-widget {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+.side-donate-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.side-donate-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--brand);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.side-donate-slogan {
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.6;
+  margin: 0 0 14px;
+}
+
+.side-donate-slogan .link-phi-thu {
+  color: var(--brand);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.side-donate-qr-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.side-donate-qr-img {
+  width: 175px;
+  height: auto;
+  border-radius: 14px;
+  border: 2px solid var(--border);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  display: block;
+  transition: transform 0.25s ease;
+}
+
+.side-donate-qr-img:hover {
+  transform: scale(1.05);
+}
+
+.side-donate-bank-info {
+  font-size: 12.5px;
+  color: var(--ink);
+  line-height: 1.5;
+  text-align: center;
+}
+
+.side-donate-bank-info .bank-tag {
+  font-weight: 700;
+  color: var(--brand);
+}
+
+.side-donate-bank-info .bank-holder,
+.side-donate-bank-info .bank-acc {
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.side-donate-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  background: var(--brand);
+  color: #fff !important;
+  font-size: 13.5px;
+  font-weight: 700;
+  border-radius: 99px;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.side-donate-btn:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+/* --- MÀN HÌNH DESKTOP RỘNG (>= 1440px): ĐẶT Ở KHOẢNG TRỐNG BÊN TRÁI MÀN HÌNH --- */
+@media (min-width: 1440px) {
+  .side-donate-widget {
+    position: fixed;
+    top: 95px;
+    left: max(16px, calc((100vw - var(--container-max)) / 2 - 325px));
+    width: 300px;
+    padding: 20px 18px;
+    z-index: 99;
+    text-align: center;
+  }
+  .side-donate-body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: center;
+  }
+  .side-donate-content {
+    width: 100%;
+    text-align: left;
+  }
+}
+
+/* --- MÀN HÌNH LAPTOP / TABLET (768px - 1439px): INLINE TRÊN ĐẦU TRANG CHỦ DẠNG BANNER NGANG --- */
+@media (min-width: 768px) and (max-width: 1439px) {
+  .side-donate-widget {
+    position: relative;
+    max-width: var(--container-max);
+    margin: 20px auto 0;
+    padding: 18px 24px;
+  }
+  .side-donate-header {
+    justify-content: flex-start;
+    margin-bottom: 12px;
+  }
+  .side-donate-body {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+  .side-donate-qr-wrap {
+    flex-shrink: 0;
+  }
+  .side-donate-qr-img {
+    width: 130px;
+  }
+  .side-donate-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .side-donate-slogan {
+    font-size: 14px;
+    margin-bottom: 14px;
+  }
+  .side-donate-btn {
+    width: fit-content;
+    padding: 9px 24px;
+  }
+}
+
+/* --- MÀN HÌNH ĐIỆN THOẠI (< 768px): INLINE TRÊN ĐẦU TRANG CHỦ GỌN GÀNG, ĐẸP MẮT --- */
+@media (max-width: 767px) {
+  .side-donate-widget {
+    position: relative;
+    margin: 16px 12px 0;
+    padding: 16px 14px;
+  }
+  .side-donate-header {
+    margin-bottom: 10px;
+  }
+  .side-donate-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+  }
+  .side-donate-qr-img {
+    width: 150px;
+  }
+  .side-donate-slogan {
+    font-size: 13px;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .side-donate-btn {
+    width: 100%;
+  }
+}
+
+
+/* =========================================================================
+   SITE FOOTER (MODERN 3-COLUMN FOOTER WITH HARMONIOUS PROPORTIONS)
+   ========================================================================= */
+.site-footer {
+  background: var(--bg-soft);
+  border-top: 1px solid var(--border);
+  padding: 50px 0 24px;
+  margin-top: 60px;
+  color: var(--ink);
+}
+
+html[data-theme="dark"] .site-footer {
+  background: #0b1120 !important;
+  border-color: #1e293b !important;
+}
+
+.footer-container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 36px;
+}
+
+.footer-col--brand {
+  max-width: 480px;
+}
+
+.footer-logo-link {
+  display: inline-block;
+  margin-bottom: 14px;
+}
+
+.footer-logo {
+  height: 38px;
+  width: auto;
+  display: block;
+}
+
+.footer-desc {
+  font-size: 13.5px;
+  color: var(--ink-2);
+  line-height: 1.7;
+  margin: 0 0 16px;
+}
+
+.footer-badges {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.footer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink-2);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 99px;
+}
+
+.footer-heading {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.2px;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footer-links li a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-2);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.footer-links li a i.fa-angle-right {
+  font-size: 11px;
+  color: var(--ink-2);
+  opacity: 0.6;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.footer-links li a:hover {
+  color: var(--brand);
+  transform: translateX(4px);
+}
+
+.footer-links li a:hover i.fa-angle-right {
+  color: var(--brand);
+  opacity: 1;
+}
+
+.footer-feedback-link {
+  color: var(--brand) !important;
+  font-weight: 700 !important;
+}
+
+.footer-feedback-link:hover {
+  text-decoration: underline;
+}
+
+.footer-bottom {
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+.footer-bottom p {
+  margin: 0;
+}
+
+/* Responsive Footer */
+@media (max-width: 992px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+  .footer-col--brand {
+    grid-column: span 2;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .footer-col--brand {
+    grid-column: span 1;
+  }
+  .site-footer {
+    padding: 36px 0 20px;
+    margin-top: 36px;
+  }
+}
+
+
+/* =========================================================================
+   PHI THƯ TRUYỀN TIN (MODERN FEEDBACK FORM WITH INTERACTIVE CAPSULES)
+   ========================================================================= */
+.feedback-card {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 40px 36px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(12px);
+}
+
+html[data-theme="dark"] .feedback-card {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+.feedback-icon-badge {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.1));
+  color: var(--brand);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+}
+
+.feedback-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+
+.feedback-subtitle {
+  font-size: 14px;
+  color: var(--ink-2);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.feedback-label {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+
+.feedback-label i {
+  color: var(--brand);
+  margin-right: 6px;
+}
+
+/* Category Pills instead of native dropdown */
+.feedback-type-capsules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.fb-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid var(--border);
+  border-radius: 99px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+html[data-theme="light"] .fb-pill-btn {
+  background: #f8fafc;
+}
+
+.fb-pill-btn:hover {
+  color: var(--brand);
+  border-color: var(--brand);
+  transform: translateY(-1px);
+}
+
+.fb-pill-btn.active {
+  background: linear-gradient(135deg, var(--brand), #2563eb) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+  transform: translateY(-1px);
+}
+
+.fb-pill-btn.active i {
+  color: #ffffff !important;
+}
+
+/* Textarea beautification */
+.feedback-textarea-wrap {
+  margin-bottom: 24px;
+}
+
+.feedback-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 160px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1.5px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.6;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+html[data-theme="dark"] .feedback-textarea {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html[data-theme="light"] .feedback-textarea {
+  background: #ffffff !important;
+}
+
+.feedback-textarea:focus {
+  border-color: var(--brand) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+}
+
+.feedback-textarea::placeholder {
+  color: var(--ink-2);
+  opacity: 0.65;
+}
+
+.feedback-hint {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--ink-2);
+  margin-top: 6px;
+  padding: 0 4px;
+}
+
+/* Action buttons */
+.feedback-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.btn-feedback-back {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 11px 22px;
+  border-radius: 99px;
+  border: 1.5px solid var(--border);
+  color: var(--ink);
+  background: transparent;
+  transition: all 0.2s;
+}
+
+.btn-feedback-back:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--brand);
+  color: var(--brand);
+}
+
+.btn-feedback-submit {
+  background: linear-gradient(135deg, var(--brand), #2563eb);
+  color: #fff !important;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 99px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.35);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-feedback-submit:hover {
+  opacity: 0.94;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(59, 130, 246, 0.45);
+}
+
+.btn-feedback-submit:active {
+  transform: translateY(0);
+}

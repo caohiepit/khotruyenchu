@@ -97,6 +97,16 @@ func AutoMigrate(db *sql.DB) error {
 		updated_at TIMESTAMPTZ DEFAULT NOW()
 	);
 
+	-- Feedback table (Phi thư truyền tin)
+	CREATE TABLE IF NOT EXISTS feedback (
+		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+		name VARCHAR(150),
+		contact VARCHAR(150),
+		feedback_type VARCHAR(100),
+		content TEXT NOT NULL,
+		created_at TIMESTAMPTZ DEFAULT NOW()
+	);
+
 	-- Seed default sources if table is empty
 	INSERT INTO sources (name, slug, domain, base_url, catalog_url, is_active, scan_interval_hours)
 	VALUES 

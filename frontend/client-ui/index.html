@@ -56,7 +56,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
   <!-- Client Stylesheet -->
-  <link rel="stylesheet" href="css/client.css?v=9.7">
+  <link rel="stylesheet" href="css/client.css?v=10.5">
 </head>
 <body>
 
@@ -72,8 +72,8 @@
       </button>
 
       <h1 class="logo">
-        <a href="#/" title="KhoTruyenChu - Đọc truyện online chất lượng cao">
-          <img src="assets/khotruyenchu.svg?v=9.0" alt="KhoTruyenChu" style="height: 38px; width: auto; max-width: 260px; display: block;">
+        <a href="#/" title="TruyenChu - Đọc truyện online chất lượng cao">
+          <img src="assets/khotruyenchu.svg?v=10.4" alt="TruyenChu" style="height: 38px; width: auto; max-width: 260px; display: block;">
         </a>
       </h1>
 
@@ -190,10 +190,44 @@
        ================================================================= -->
   <main class="main-container">
 
+    <!-- KHỐI ỦNG HỘ LINH THẠCH (XUẤT HIỆN Ở MỌI MÀN HÌNH: DESKTOP CÁNH GÀ CỐ ĐỊNH, TABLET/MOBILE INLINE BANNER) -->
+    <aside class="side-donate-widget" id="side-donate-widget" aria-label="Ủng hộ TruyenChu">
+      <div class="side-donate-header">
+        <div class="side-donate-title">
+          <i class="fa-solid fa-gem text-orange"></i>
+          <span>Ủng Hộ Linh Thạch</span>
+        </div>
+      </div>
+
+      <div class="side-donate-body">
+        <div class="side-donate-qr-wrap">
+          <a href="assets/qr_donate.jpg?v=9.9" target="_blank" title="Bấm xem ảnh lớn">
+            <img src="assets/qr_donate.jpg?v=9.9" alt="VietQR Napas 247 - NGUYEN CAO HIEP" class="side-donate-qr-img">
+          </a>
+          <div class="side-donate-bank-info">
+            <div class="bank-tag"><i class="fa-solid fa-qrcode"></i> VietQR Napas 247</div>
+            <div class="bank-holder"><i class="fa-regular fa-user"></i> NGUYEN CAO HIEP</div>
+            <div class="bank-acc"><i class="fa-solid fa-phone"></i> 0978989032</div>
+          </div>
+        </div>
+
+        <div class="side-donate-content">
+          <p class="side-donate-slogan">
+            Mong các đạo hữu để lại chút linh thạch để ta có thể phục vụ các đạo hữu tốt hơn! Mọi ý kiến hãy truyền âm qua <a href="#/feedback" class="link-phi-thu"><i class="fa-solid fa-paper-plane"></i> Phi thư truyền tin</a>!
+          </p>
+
+          <a href="#/feedback" class="side-donate-btn">
+            <i class="fa-solid fa-paper-plane"></i> Gửi Phi Thư Truyền Tin
+          </a>
+        </div>
+      </div>
+    </aside>
+
     <!-- =================================================================
          VIEW 1: TRANG CHỦ (HOMEPAGE)
          ================================================================= -->
     <section class="view-section active" id="view-home">
+
       <!-- 1. DYNAMIC TALL HERO SLIDER SECTION (CAO & TỰ ĐỘNG CHUYỂN SLIDE) -->
       <section class="slider-section" id="hero-slider-section">
         <div class="container hero-slider-outer">
@@ -388,39 +422,126 @@
       </div>
     </section>
 
+    <!-- =================================================================
+         VIEW 5: PHI THƯ TRUYỀN TIN (FEEDBACK & Ý KIẾN ĐỘC GIẢ)
+         ================================================================= -->
+    <section class="view-section" id="view-feedback">
+      <div class="container" style="max-width: 680px; margin: 0 auto; padding: 32px 16px;">
+        <div class="feedback-card">
+          <div style="text-align: center; margin-bottom: 28px;">
+            <div class="feedback-icon-badge">
+              <i class="fa-solid fa-paper-plane"></i>
+            </div>
+            <h1 class="feedback-title">Phi Thư Truyền Tin</h1>
+            <p class="feedback-subtitle">Truyền âm góp ý, báo lỗi chương, yêu cầu thêm bộ truyện mới hoặc gửi lời tâm đắc cùng chưởng môn KhoTruyenChu.</p>
+          </div>
+
+          <form id="form-feedback">
+            <div style="margin-bottom: 20px;">
+              <label class="feedback-label">
+                <i class="fa-solid fa-tag"></i> Loại Ý Kiến / Truyền Tin
+              </label>
+              <div class="feedback-type-capsules" id="fb-type-group">
+                <button type="button" class="fb-pill-btn active" data-type="Góp ý giao diện & tính năng">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> Góp ý giao diện &amp; tính năng
+                </button>
+                <button type="button" class="fb-pill-btn" data-type="Báo lỗi chương / dịch thuật">
+                  <i class="fa-solid fa-triangle-exclamation"></i> Báo lỗi chương / dịch thuật
+                </button>
+                <button type="button" class="fb-pill-btn" data-type="Yêu cầu truyện mới">
+                  <i class="fa-solid fa-book-medical"></i> Yêu cầu truyện mới
+                </button>
+                <button type="button" class="fb-pill-btn" data-type="Ủng hộ & động viên">
+                  <i class="fa-solid fa-heart"></i> Tâm thư ủng hộ
+                </button>
+                <button type="button" class="fb-pill-btn" data-type="Khác">
+                  <i class="fa-solid fa-comment-dots"></i> Khác...
+                </button>
+              </div>
+              <input type="hidden" id="fb-type" value="Góp ý giao diện & tính năng">
+            </div>
+
+            <div class="feedback-textarea-wrap">
+              <label class="feedback-label" for="fb-content">
+                <i class="fa-solid fa-comment-dots"></i> Lời Truyền Âm / Nội Dung Ý Kiến <span style="color:#ef4444;">*</span>
+              </label>
+              <textarea id="fb-content" required placeholder="Mời đạo hữu hạ bút, ghi rõ chi tiết ý kiến hoặc tên truyện, số chương lỗi để ban quản trị xử lý nhanh nhất..." class="feedback-textarea"></textarea>
+              <div class="feedback-hint">
+                <span><i class="fa-solid fa-shield-halved" style="color:var(--brand); margin-right:4px;"></i> Phi thư sẽ được chuyển trực tiếp đến ban quản trị KhoTruyenChu</span>
+              </div>
+            </div>
+
+            <div id="fb-alert" style="display:none; padding:12px 16px; border-radius:12px; margin-bottom:18px; font-size:13.5px;"></div>
+
+            <div class="feedback-actions">
+              <a href="#/" class="btn-feedback-back">
+                <i class="fa-solid fa-arrow-left"></i> Quay lại Trang Chủ
+              </a>
+              <button type="submit" id="btn-submit-feedback" class="btn-feedback-submit">
+                <i class="fa-solid fa-paper-plane"></i> Phóng Phi Thư Ngay
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
   </main>
 
   <!-- =================================================================
        SITE FOOTER (KHOTRUYENCHU)
        ================================================================= -->
-  <footer class="site-footer" role="contentinfo" style="background: var(--bg-soft); border-top: 1px solid var(--border); padding: 40px 0 24px; margin-top: 48px;">
-    <div class="container" style="max-width: var(--container-max); margin: 0 auto; padding: 0 16px;">
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px; margin-bottom: 32px;">
-        <div>
-          <a href="#/"><img src="assets/khotruyenchu.svg?v=9.0" alt="KhoTruyenChu" style="height: 36px; width: auto; margin-bottom: 12px; display: block;"></a>
-          <p style="font-size: 13px; color: var(--ink-2); line-height: 1.6; margin: 0;">KhoTruyenChu - Nền tảng đọc truyện chữ online tốc độ cao hàng đầu. Kho tiểu thuyết đồ sộ Tiên Hiệp, Kiếm Hiệp, Ngôn Tình, Huyền Huyễn chất lượng cao cập nhật chương mới liên tục mỗi ngày.</p>
+  <footer class="site-footer" role="contentinfo">
+    <div class="container footer-container">
+      <div class="footer-grid">
+        <!-- CỘT 1: THÔNG TIN THƯ VIỆN & BRAND -->
+        <div class="footer-col footer-col--brand">
+          <a href="#/" class="footer-logo-link" title="TruyenChu">
+            <img src="assets/khotruyenchu.svg?v=10.4" alt="TruyenChu" class="footer-logo">
+          </a>
+          <p class="footer-desc">
+            TruyenChu - Nền tảng đọc truyện chữ online tốc độ cao hàng đầu. Kho tiểu thuyết đồ sộ Tiên Hiệp, Kiếm Hiệp, Ngôn Tình, Huyền Huyễn chất lượng cao cập nhật chương mới liên tục mỗi ngày.
+          </p>
+          <div class="footer-badges">
+            <span class="footer-badge"><i class="fa-solid fa-bolt text-orange"></i> Tốc độ cao</span>
+            <span class="footer-badge"><i class="fa-solid fa-shield-halved"></i> Miễn phí</span>
+            <span class="footer-badge"><i class="fa-solid fa-mobile-screen"></i> Tối ưu đọc</span>
+          </div>
         </div>
-        <div>
-          <h4 style="font-size: 14px; font-weight: 700; color: var(--ink); margin: 0 0 12px;">Danh Mục Nổi Bật</h4>
-          <ul style="list-style: none; padding: 0; margin: 0; font-size: 13px; color: var(--ink-2); line-height: 2;">
-            <li><a href="#/library" style="color: inherit; text-decoration:none;">Truyện Tiên Hiệp Chọn Lọc</a></li>
-            <li><a href="#/library" style="color: inherit; text-decoration:none;">Truyện Ngôn Tình Sắc Nét</a></li>
-            <li><a href="#/library" style="color: inherit; text-decoration:none;">Truyện Kiếm Hiệp Đặc Sắc</a></li>
-            <li><a href="#/ranking" style="color: inherit; text-decoration:none;">Bảng Xếp Hạng Đọc Nhiều</a></li>
+
+        <!-- CỘT 2: DANH MỤC NỔI BẬT -->
+        <div class="footer-col">
+          <h4 class="footer-heading">
+            <i class="fa-solid fa-book-bookmark text-orange"></i> Danh Mục Nổi Bật
+          </h4>
+          <ul class="footer-links">
+            <li><a href="#/library" data-genre="Tiên Hiệp"><i class="fa-solid fa-angle-right"></i> Truyện Tiên Hiệp Chọn Lọc</a></li>
+            <li><a href="#/library" data-genre="Ngôn Tình"><i class="fa-solid fa-angle-right"></i> Truyện Ngôn Tình Sắc Nét</a></li>
+            <li><a href="#/library" data-genre="Kiếm Hiệp"><i class="fa-solid fa-angle-right"></i> Truyện Kiếm Hiệp Đặc Sắc</a></li>
+            <li><a href="#/ranking"><i class="fa-solid fa-angle-right"></i> Bảng Xếp Hạng Đọc Nhiều</a></li>
           </ul>
         </div>
-        <div>
-          <h4 style="font-size: 14px; font-weight: 700; color: var(--ink); margin: 0 0 12px;">Chính Sách &amp; Hỗ Trợ</h4>
-          <ul style="list-style: none; padding: 0; margin: 0; font-size: 13px; color: var(--ink-2); line-height: 2;">
-            <li><a href="#/about" style="color: inherit; text-decoration:none;">Giới thiệu KhoTruyenChu</a></li>
-            <li><a href="#/affiliate" style="color: inherit; text-decoration:none;">Chính sách Affiliate Shopee</a></li>
-            <li><a href="#/privacy" style="color: inherit; text-decoration:none;">Chính sách bảo mật</a></li>
-            <li><a href="#/tos" style="color: inherit; text-decoration:none;">Điều khoản sử dụng</a></li>
+
+        <!-- CỘT 3: CHÍNH SÁCH & PHI THƯ -->
+        <div class="footer-col">
+          <h4 class="footer-heading">
+            <i class="fa-solid fa-circle-info text-orange"></i> Chính Sách &amp; Hỗ Trợ
+          </h4>
+          <ul class="footer-links">
+            <li><a href="#/about"><i class="fa-solid fa-angle-right"></i> Giới thiệu TruyenChu</a></li>
+            <li>
+              <a href="#/feedback" class="footer-feedback-link">
+                <i class="fa-solid fa-paper-plane text-orange"></i>
+                <span>Phi thư truyền tin (Góp ý)</span>
+              </a>
+            </li>
+            <li><a href="#/privacy"><i class="fa-solid fa-angle-right"></i> Chính sách bảo mật</a></li>
+            <li><a href="#/tos"><i class="fa-solid fa-angle-right"></i> Điều khoản sử dụng</a></li>
           </ul>
         </div>
       </div>
-      <div style="border-top: 1px solid var(--border); padding-top: 18px; text-align: center; font-size: 12px; color: var(--ink-2);">
-        &copy; 2026 KhoTruyenChu. Nền tảng đọc truyện chữ online nhanh &amp; mượt mà nhất.
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 TruyenChu. Nền tảng đọc truyện chữ online nhanh &amp; mượt mà nhất.</p>
       </div>
     </div>
   </footer>
@@ -474,6 +595,6 @@
   </div>
 
   <!-- Client Application Script -->
-  <script src="js/client.js?v=9.7"></script>
+  <script src="js/client.js?v=10.5"></script>
 </body>
 </html>
