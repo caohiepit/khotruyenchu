@@ -30,12 +30,12 @@ func (r *FeedbackRepository) CreateFeedback(fb *domain.Feedback) error {
 	fb.CreatedAt = time.Now()
 	if r.db != nil && r.db.Ping() == nil {
 		query := `
-			INSERT INTO feedback (name, contact, feedback_type, content, created_at)
-			VALUES ($1, $2, $3, $4, $5)
+			INSERT INTO feedback (feedback_type, content, created_at)
+			VALUES ($1, $2, $3)
 			RETURNING id;
 		`
 		var id string
-		err := r.db.QueryRow(query, fb.Name, fb.Contact, fb.FeedbackType, fb.Content, fb.CreatedAt).Scan(&id)
+		err := r.db.QueryRow(query, fb.FeedbackType, fb.Content, fb.CreatedAt).Scan(&id)
 		if err == nil {
 			fb.ID = id
 			_ = r.saveToDisk(fb)
@@ -66,13 +66,13 @@ func (r *FeedbackRepository) saveToDisk(fb *domain.Feedback) error {
 
 func (r *FeedbackRepository) GetAllFeedback() ([]domain.Feedback, error) {
 	if r.db != nil && r.db.Ping() == nil {
-		rows, err := r.db.Query("SELECT id, COALESCE(name, ''), COALESCE(contact, ''), COALESCE(feedback_type, ''), content, created_at FROM feedback ORDER BY created_at DESC LIMIT 100")
+		rows, err := r.db.Query("SELECT id, COALESCE(feedback_type, ''), content, created_at FROM feedback ORDER BY created_at DESC LIMIT 100")
 		if err == nil {
 			defer rows.Close()
 			var list []domain.Feedback
 			for rows.Next() {
 				var item domain.Feedback
-				if err := rows.Scan(&item.ID, &item.Name, &item.Contact, &item.FeedbackType, &item.Content, &item.CreatedAt); err == nil {
+				if err := rows.Scan(&item.ID, &item.FeedbackType, &item.Content, &item.CreatedAt); err == nil {
 					list = append(list, item)
 				}
 			}

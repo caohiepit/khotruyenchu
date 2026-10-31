@@ -4219,8 +4219,6 @@ function initFeedbackForm() {
     const typeEl = document.getElementById('fb-type');
     const contentEl = document.getElementById('fb-content');
 
-    const name = nameEl ? nameEl.value.trim() : '';
-    const contact = contactEl ? contactEl.value.trim() : '';
     const feedbackType = typeEl ? typeEl.value : 'Ý kiến chung';
     const content = contentEl ? contentEl.value.trim() : '';
 
@@ -4244,8 +4242,6 @@ function initFeedbackForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: name || 'Ẩn danh đạo hữu',
-          contact: contact,
           feedback_type: feedbackType,
           content: content
         })

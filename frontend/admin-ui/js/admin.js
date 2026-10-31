@@ -120,7 +120,6 @@ const elements = {
   btnCloseFeedbackBtn: document.getElementById('btn-close-feedback-btn'),
   btnModalDeleteFeedback: document.getElementById('btn-modal-delete-feedback'),
   modalFeedbackMeta: document.getElementById('modal-feedback-meta'),
-  modalFeedbackAuthor: document.getElementById('modal-feedback-author'),
   modalFeedbackTypeBadge: document.getElementById('modal-feedback-type-badge'),
   modalFeedbackContent: document.getElementById('modal-feedback-content')
 };
@@ -1166,10 +1165,9 @@ function renderFeedbackTable() {
   let filtered = feedbackCache.filter(item => {
     if (filterType && !(item.feedback_type || '').includes(filterType)) return false;
     if (searchQuery) {
-      const matchName = (item.name || '').toLowerCase().includes(searchQuery);
       const matchContent = (item.content || '').toLowerCase().includes(searchQuery);
-      const matchContact = (item.contact || '').toLowerCase().includes(searchQuery);
-      if (!matchName && !matchContent && !matchContact) return false;
+      const matchType = (item.feedback_type || '').toLowerCase().includes(searchQuery);
+      if (!matchContent && !matchType) return false;
     }
     return true;
   });
@@ -1181,7 +1179,7 @@ function renderFeedbackTable() {
   if (filtered.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="5" style="text-align: center; padding: 36px; color: var(--text-dim);">
+        <td colspan="4" style="text-align: center; padding: 36px; color: var(--text-dim);">
           <i class="fa-regular fa-comments" style="font-size: 2rem; margin-bottom: 10px; display: block; opacity: 0.5;"></i>
           ${feedbackCache.length === 0 ? 'Chưa có phi thư truyền tin nào từ độc giả.' : 'Không tìm thấy ý kiến nào khớp với bộ lọc.'}
         </td>
@@ -1192,9 +1190,7 @@ function renderFeedbackTable() {
 
   tbody.innerHTML = filtered.map(f => {
     const rawContent = f.content || '';
-    const previewContent = rawContent.length > 95 ? rawContent.substring(0, 95) + '...' : rawContent;
-    const authorName = escapeHtml(f.name || 'Đạo hữu ẩn danh');
-    const contactInfo = f.contact ? `<div style="font-size: 0.76rem; color: var(--text-dim); margin-top: 3px;"><i class="fa-regular fa-id-badge"></i> ${escapeHtml(f.contact)}</div>` : '';
+    const previewContent = rawContent.length > 110 ? rawContent.substring(0, 110) + '...' : rawContent;
 
     return `
       <tr style="cursor: pointer;" onclick="if (!event.target.closest('button')) openFeedbackDetail('${f.id}')">
@@ -1202,14 +1198,10 @@ function renderFeedbackTable() {
           <i class="fa-regular fa-clock" style="color: var(--cyan-primary); margin-right: 4px;"></i>${formatFeedbackTime(f.created_at)}
         </td>
         <td>
-          <strong style="color: var(--text-main); font-size: 0.9rem;">${authorName}</strong>
-          ${contactInfo}
-        </td>
-        <td>
           ${getFeedbackBadgeHtml(f.feedback_type)}
         </td>
         <td>
-          <div style="color: #cbd5e1; font-size: 0.86rem; line-height: 1.5; word-break: break-word;" title="Nhấp để xem toàn văn">
+          <div style="color: #cbd5e1; font-size: 0.88rem; line-height: 1.5; word-break: break-word;" title="Nhấp để xem toàn văn">
             ${escapeHtml(previewContent)}
           </div>
         </td>
@@ -1233,13 +1225,6 @@ window.openFeedbackDetail = function(id) {
   currentDetailFeedbackId = id;
   if (elements.modalFeedbackMeta) {
     elements.modalFeedbackMeta.textContent = `Thời gian gửi: ${formatFeedbackTime(item.created_at)} | ID: #${item.id.substring(0, 8)}`;
-  }
-  if (elements.modalFeedbackAuthor) {
-    let authorHtml = escapeHtml(item.name || 'Đạo hữu ẩn danh');
-    if (item.contact) {
-      authorHtml += ` <span style="font-weight: 400; font-size: 0.82rem; color: var(--text-dim);">(${escapeHtml(item.contact)})</span>`;
-    }
-    elements.modalFeedbackAuthor.innerHTML = authorHtml;
   }
   if (elements.modalFeedbackTypeBadge) {
     elements.modalFeedbackTypeBadge.innerHTML = getFeedbackBadgeHtml(item.feedback_type);

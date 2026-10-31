@@ -1,32 +1,24 @@
 [
   {
     "id": "d4ed7710-9c3c-4493-b5c7-51f0725b9ac8",
-    "name": "Hàn Lập",
-    "contact": "hanlap@truyenchu.vn",
-    "feedback_type": "Góp ý giao diện \u0026 tính năng",
+    "feedback_type": "Góp ý giao diện & tính năng",
     "content": "Giao diện tối màu đọc ban đêm rất êm mắt, font chữ đọc mượt mà và dễ chịu!",
     "created_at": "2026-10-31T22:49:50.4719349+07:00"
   },
   {
     "id": "15b1c70a-f78c-4eb9-90eb-d250a4f6853a",
-    "name": "Đạo hữu ẩn danh",
-    "contact": "",
     "feedback_type": "Yêu cầu bổ sung bộ truyện mới",
     "content": "Xin chào admin, mong web thêm bộ Phàm Nhân Tu Tiên Chi Tiên Giới Thiên bản dịch chuẩn!",
     "created_at": "2026-10-31T22:37:54.7308279+07:00"
   },
   {
     "id": "b336b943-efd1-4a5f-80fc-a855c03740e3",
-    "name": "Đạo hữu ẩn danh",
-    "contact": "",
     "feedback_type": "Báo lỗi chương / mất chữ / trùng lặp",
     "content": "Chương 15 bộ Đấu La Đại Lục bị lặp 2 đoạn cuối, mong chưởng môn sửa giúp ạ!",
     "created_at": "2026-10-31T22:37:54.7208371+07:00"
   },
   {
     "id": "211ac459-0216-4f68-aca3-bf3dbe513a37",
-    "name": "Đạo hữu ẩn danh",
-    "contact": "",
     "feedback_type": "Báo lỗi chương / mất chữ / trùng lặp",
     "content": "Chương 15 bộ Đấu La Đại Lục bị lặp 2 đoạn cuối, mong chưởng môn sửa giúp ạ!",
     "created_at": "2026-10-31T22:37:45.9572936+07:00"

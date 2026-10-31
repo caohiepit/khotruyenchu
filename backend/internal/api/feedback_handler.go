@@ -10,8 +10,6 @@ import (
 
 func (s *Server) handleCreateFeedback(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Name         string `json:"name"`
-		Contact      string `json:"contact"`
 		FeedbackType string `json:"feedback_type"`
 		Content      string `json:"content"`
 	}
@@ -27,18 +25,12 @@ func (s *Server) handleCreateFeedback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	name := strings.TrimSpace(input.Name)
-	if name == "" {
-		name = "Đạo hữu ẩn danh"
-	}
 	fType := strings.TrimSpace(input.FeedbackType)
 	if fType == "" {
 		fType = "Góp ý chung"
 	}
 
 	fb := &domain.Feedback{
-		Name:         name,
-		Contact:      strings.TrimSpace(input.Contact),
 		FeedbackType: fType,
 		Content:      input.Content,
 	}
