@@ -3,6 +3,7 @@ package storage
 import (
 	"database/sql"
 	"fmt"
+	"sort"
 	"strings"
 
 	"comics-backend/internal/domain"
@@ -140,7 +141,7 @@ func (r *NovelRepository) SaveNovelAndChapters(novel *domain.Novel, chapters []*
 }
 
 // GetNovels queries novels with pagination and optional search filter (falls back to disk storage if DB unavailable or empty)
-func (r *NovelRepository) GetNovels(search string, page int, limit int) ([]domain.Novel, int, error) {
+func (r *NovelRepository) GetNovels(search string, page int, limit int, sortBy ...string) ([]domain.Novel, int, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -149,8 +150,13 @@ func (r *NovelRepository) GetNovels(search string, page int, limit int) ([]domai
 	}
 	offset := (page - 1) * limit
 
+	sortParam := ""
+	if len(sortBy) > 0 {
+		sortParam = sortBy[0]
+	}
+
 	if !r.dbAvailable() {
-		return r.getNovelsFromDisk(search, page, limit)
+		return r.getNovelsFromDisk(search, page, limit, sortParam)
 	}
 
 	var total int
@@ -169,25 +175,32 @@ func (r *NovelRepository) GetNovels(search string, page int, limit int) ([]domai
 		FROM novels n
 	`
 
+	orderClause := " ORDER BY n.updated_at DESC"
+	if sortParam == "views" || sortParam == "views_all" {
+		orderClause = " ORDER BY n.views_count DESC, actual_chapters DESC"
+	} else if sortParam == "chapters" {
+		orderClause = " ORDER BY actual_chapters DESC"
+	}
+
 	var rows *sql.Rows
 	var err error
 
 	if search != "" {
 		filter := "%" + search + "%"
 		_ = r.db.QueryRow("SELECT COUNT(*) FROM novels WHERE title ILIKE $1 OR author_name ILIKE $1", filter).Scan(&total)
-		query := baseDataQuery + " WHERE n.title ILIKE $1 OR n.author_name ILIKE $1 ORDER BY n.updated_at DESC LIMIT $2 OFFSET $3"
+		query := baseDataQuery + " WHERE n.title ILIKE $1 OR n.author_name ILIKE $1" + orderClause + " LIMIT $2 OFFSET $3"
 		rows, err = r.db.Query(query, filter, limit, offset)
 	} else {
 		_ = r.db.QueryRow(baseCountQuery).Scan(&total)
 		if total == 0 {
-			return r.getNovelsFromDisk(search, page, limit)
+			return r.getNovelsFromDisk(search, page, limit, sortParam)
 		}
-		query := baseDataQuery + " ORDER BY n.updated_at DESC LIMIT $1 OFFSET $2"
+		query := baseDataQuery + orderClause + " LIMIT $1 OFFSET $2"
 		rows, err = r.db.Query(query, limit, offset)
 	}
 
 	if err != nil {
-		return r.getNovelsFromDisk(search, page, limit)
+		return r.getNovelsFromDisk(search, page, limit, sortParam)
 	}
 	defer rows.Close()
 
@@ -213,7 +226,7 @@ func (r *NovelRepository) GetNovels(search string, page int, limit int) ([]domai
 	return items, total, nil
 }
 
-func (r *NovelRepository) getNovelsFromDisk(search string, page int, limit int) ([]domain.Novel, int, error) {
+func (r *NovelRepository) getNovelsFromDisk(search string, page int, limit int, sortBy ...string) ([]domain.Novel, int, error) {
 	all := r.fs.LoadAllNovelsFromDisk()
 	if search != "" {
 		q := strings.ToLower(search)
@@ -224,6 +237,31 @@ func (r *NovelRepository) getNovelsFromDisk(search string, page int, limit int) 
 			}
 		}
 		all = filtered
+	}
+
+	sortParam := ""
+	if len(sortBy) > 0 {
+		sortParam = sortBy[0]
+	}
+	if sortParam == "views" || sortParam == "views_all" {
+		sort.Slice(all, func(i, j int) bool {
+			vi := all[i].ViewsCount
+			if vi <= 0 {
+				vi = int64(all[i].ActualChapters * 1250)
+			}
+			vj := all[j].ViewsCount
+			if vj <= 0 {
+				vj = int64(all[j].ActualChapters * 1250)
+			}
+			if vi != vj {
+				return vi > vj
+			}
+			return all[i].ActualChapters > all[j].ActualChapters
+		})
+	} else if sortParam == "chapters" {
+		sort.Slice(all, func(i, j int) bool {
+			return all[i].ActualChapters > all[j].ActualChapters
+		})
 	}
 	total := len(all)
 	offset := (page - 1) * limit

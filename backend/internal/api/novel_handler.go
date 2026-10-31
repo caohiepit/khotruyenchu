@@ -20,6 +20,7 @@ func (s *Server) handleGetNovels(w http.ResponseWriter, r *http.Request) {
 	search := strings.TrimSpace(r.URL.Query().Get("q"))
 	pageStr := r.URL.Query().Get("page")
 	limitStr := r.URL.Query().Get("limit")
+	sortParam := strings.TrimSpace(r.URL.Query().Get("sort"))
 
 	page := 1
 	if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
@@ -30,7 +31,7 @@ func (s *Server) handleGetNovels(w http.ResponseWriter, r *http.Request) {
 		limit = l
 	}
 
-	items, total, err := s.novelRepo.GetNovels(search, page, limit)
+	items, total, err := s.novelRepo.GetNovels(search, page, limit, sortParam)
 	if err != nil {
 		jsonResponse(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
