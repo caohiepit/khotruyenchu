@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"comics-backend/internal/cleaner"
 	"comics-backend/internal/domain"
 )
 
@@ -27,6 +28,12 @@ func NewFileStorage(baseDir string) *FileStorage {
 
 // SaveNovelAndChapters writes novel.json and individual chapter .txt / .json files
 func (fs *FileStorage) SaveNovelAndChapters(novel *domain.Novel, chapters []*domain.Chapter) error {
+	// 🧹 Clean data trước khi lưu xuống disk
+	cleaner.CleanNovel(novel)
+	for _, c := range chapters {
+		cleaner.CleanChapter(c)
+	}
+
 	novelDir := filepath.Join(fs.baseDir, novel.Slug)
 	chaptersDir := filepath.Join(novelDir, "chapters")
 

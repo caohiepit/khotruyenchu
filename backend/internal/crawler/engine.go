@@ -4,9 +4,14 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
+	"comics-backend/internal/cleaner"
 	"comics-backend/internal/domain"
 	"comics-backend/internal/storage"
 )
@@ -197,6 +202,9 @@ func (e *Engine) processNovelItem(item *domain.CrawlQueueItem) {
 	if novel.CoverURL == "" {
 		novel.CoverURL = item.CoverURL
 	}
+	if novel.CoverURL != "" {
+		novel.CoverURL = e.downloadAndCleanCover(novel.CoverURL, novel.Slug)
+	}
 	if novel.AuthorName == "" {
 		novel.AuthorName = item.AuthorName
 	}
@@ -297,4 +305,56 @@ func (e *Engine) processNovelItem(item *domain.CrawlQueueItem) {
 	successMsg := fmt.Sprintf("✅ Hoàn thành cào truyện 【%s】: tổng cộng %d chương (kết hợp các nguồn)!", novel.Title, totalFinalChapters)
 	log.Printf("✅ [Crawler Engine] %s", successMsg)
 	e.appendLog(successMsg)
+}
+
+// downloadAndCleanCover tải ảnh bìa, tự động xóa watermark (chữ kiểu 'truyenfull.vn') và lưu cục bộ
+func (e *Engine) downloadAndCleanCover(coverURL, slug string) string {
+	if coverURL == "" || (!strings.HasPrefix(coverURL, "http://") && !strings.HasPrefix(coverURL, "https://")) {
+		return coverURL
+	}
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	req, err := http.NewRequest("GET", coverURL, nil)
+	if err != nil {
+		return coverURL
+	}
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
+	if strings.Contains(coverURL, "truyenfull") {
+		req.Header.Set("Referer", "https://truyenfull.live/")
+	} else if strings.Contains(coverURL, "tangthuvien") {
+		req.Header.Set("Referer", "https://tangthuvien.net/")
+	}
+
+	resp, err := client.Do(req)
+	if err != nil || resp.StatusCode != http.StatusOK {
+		if resp != nil {
+			_ = resp.Body.Close()
+		}
+		return coverURL
+	}
+	defer resp.Body.Close()
+
+	// 🧼 Xóa chữ kiểu 'truyenfull.vn' khỏi ảnh bìa
+	cleanBytes, err := cleaner.CleanCoverWatermark(resp.Body)
+	if err != nil || len(cleanBytes) == 0 {
+		return coverURL
+	}
+
+	// Lưu ảnh sạch vào thư mục client-ui/covers/
+	localRelPath := fmt.Sprintf("/covers/%s.jpg", slug)
+	targetPaths := []string{
+		filepath.Join("..", "frontend", "client-ui", "covers", fmt.Sprintf("%s.jpg", slug)),
+		filepath.Join("frontend", "client-ui", "covers", fmt.Sprintf("%s.jpg", slug)),
+		filepath.Join("storage", "covers", fmt.Sprintf("%s.jpg", slug)),
+	}
+
+	for _, p := range targetPaths {
+		if abs, err := filepath.Abs(p); err == nil {
+			_ = os.MkdirAll(filepath.Dir(abs), 0755)
+			_ = os.WriteFile(abs, cleanBytes, 0644)
+		}
+	}
+
+	log.Printf("🖼️ [Cover Cleaned] Đã tải ảnh bìa và xóa sạch watermark cho [%s] -> %s", slug, localRelPath)
+	return localRelPath
 }

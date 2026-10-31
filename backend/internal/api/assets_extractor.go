@@ -6,8 +6,11 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
+
+	"comics-backend/internal/cleaner"
 )
 
 // ExtractDesignAssets copies the design reference sheets into client-ui/assets/ for CSS sprite & artwork rendering
@@ -83,6 +86,16 @@ func (s *Server) handleProxyCover(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer resp.Body.Close()
+
+	// 🧼 Clean Truyenfull watermark ("truyenfull.vn", bottom banner, etc.) on the fly!
+	cleanBytes, err := cleaner.CleanCoverWatermark(resp.Body)
+	if err == nil && len(cleanBytes) > 0 {
+		w.Header().Set("Content-Type", "image/jpeg")
+		w.Header().Set("Cache-Control", "public, max-age=86400")
+		w.Header().Set("Content-Length", strconv.Itoa(len(cleanBytes)))
+		_, _ = w.Write(cleanBytes)
+		return
+	}
 
 	contentType := resp.Header.Get("Content-Type")
 	if contentType == "" {

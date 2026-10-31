@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strings"
 
+	"comics-backend/internal/cleaner"
 	"comics-backend/internal/domain"
 )
 
@@ -27,6 +28,12 @@ func (r *NovelRepository) dbAvailable() bool {
 
 // SaveNovelAndChapters saves or updates novel metadata, genres, and all chapters with LZ4 compression
 func (r *NovelRepository) SaveNovelAndChapters(novel *domain.Novel, chapters []*domain.Chapter) error {
+	// 🧹 CLEAN DATA TRƯỚC KHI LƯU VÀO DB (Xóa watermark truyenfull, chuẩn hóa tiêu đề & nội dung)
+	cleaner.CleanNovel(novel)
+	for _, c := range chapters {
+		cleaner.CleanChapter(c)
+	}
+
 	if !r.dbAvailable() {
 		return nil
 	}
