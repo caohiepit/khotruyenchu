@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Primary SEO Meta Tags -->
+  <title>KhoTruyenChu - Đọc Truyện Chữ Online Chuẩn Webnovel | Tiên Hiệp, Huyền Huyễn, Ngôn Tình Hay Nhất</title>
+  <meta name="title" content="KhoTruyenChu - Đọc Truyện Chữ Online Chuẩn Webnovel | Tiên Hiệp, Huyền Huyễn, Ngôn Tình">
+  <meta name="description" content="KhoTruyenChu - Website đọc truyện chữ online miễn phí hàng đầu. Cập nhật nhanh nhất hàng ngàn bộ truyện Tiên Hiệp, Kiếm Hiệp, Ngôn Tình, Huyền Huyễn, Đô Thị full chương. Giao diện mượt mà, đọc truyện tiện lợi, không quảng cáo rác.">
+  <meta name="keywords" content="đọc truyện, truyện chữ, đọc truyện online, truyện full, truyện tiên hiệp, kiếm hiệp, ngôn tình, huyền huyễn, đô thị, khotruyenchu, webnovel vn">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="author" content="KhoTruyenChu">
+  <link rel="canonical" href="http://localhost:8000/">
+
+  <!-- Open Graph / Facebook / Zalo -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="KhoTruyenChu">
+  <meta property="og:url" content="http://localhost:8000/">
+  <meta property="og:title" content="KhoTruyenChu - Đọc Truyện Chữ Online Chuẩn Webnovel">
+  <meta property="og:description" content="Đọc truyện chữ online hay nhất, tiểu thuyết tiên hiệp, kiếm hiệp, ngôn tình, huyền huyễn cập nhật liên tục nhanh nhất.">
+  <meta property="og:image" content="http://localhost:8000/assets/khotruyenchu.svg">
+  <meta property="og:locale" content="vi_VN">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="http://localhost:8000/">
+  <meta name="twitter:title" content="KhoTruyenChu - Đọc Truyện Chữ Online Chuẩn Webnovel">
+  <meta name="twitter:description" content="Đọc truyện chữ online hay nhất, tiểu thuyết tiên hiệp, kiếm hiệp, ngôn tình, huyền huyễn cập nhật liên tục nhanh nhất.">
+  <meta name="twitter:image" content="http://localhost:8000/assets/khotruyenchu.svg">
+
+  <!-- Schema.org Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "KhoTruyenChu",
+    "url": "http://localhost:8000/",
+    "description": "Website đọc truyện chữ online miễn phí hàng đầu với hàng ngàn bộ truyện Tiên Hiệp, Kiếm Hiệp, Ngôn Tình, Huyền Huyễn full chương.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "http://localhost:8000/#/library?q={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+
+  <!-- Google Fonts: Be Vietnam Pro (Chuẩn Webnovel) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+  <!-- Client Stylesheet -->
+  <link rel="stylesheet" href="css/client.css?v=9.5">
+</head>
+<body>
+
+  <!-- =================================================================
+       HEADER BAR (KHOTRUYENCHU)
+       ================================================================= -->
+  <header class="site-header" role="banner">
+    <div class="header__inner">
+      <button class="menu-toggle" id="btn-mobile-menu" aria-label="Mở menu">
+        <svg viewBox="0 0 24 24" aria-hidden="true" width="24" height="24" fill="currentColor">
+          <path d="M3 6h18v2H3zM3 11h18v2H3zM3 16h18v2H3z"/>
+        </svg>
+      </button>
+
+      <h1 class="logo">
+        <a href="#/" title="KhoTruyenChu - Đọc truyện online chất lượng cao">
+          <img src="assets/khotruyenchu.svg?v=9.0" alt="KhoTruyenChu" style="height: 38px; width: auto; max-width: 260px; display: block;">
+        </a>
+      </h1>
+
+      <div id="navDrawer" class="navigation">
+        <button class="drawer-close" id="btn-drawer-close" aria-label="Đóng menu">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M18.3 5.7 12 12l6.3 6.3-1.4 1.4L10.6 13.4 4.3 19.7 2.9 18.3 9.2 12 2.9 5.7 4.3 4.3l6.3 6.3 6.3-6.3z"/>
+          </svg>
+        </button>
+
+        <nav class="nav">
+          <div class="nav__item nav__item--dropdown" id="genre-dropdown-wrap">
+            <button class="nav__link nav__toggle" id="btn-genre-toggle" type="button">
+              <span>Thể loại</span>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="margin-left:4px;">
+                <path d="M6 9l6 6 6-6"/>
+              </svg>
+            </button>
+            <div id="genreMenu" class="nav-dropdown">
+              <ul class="nav-dropdown__list" id="genre-dropdown-list">
+                <li class="nav-dropdown__item"><a class="nav-dropdown__link" href="#/library" data-genre="Tiên Hiệp">Tiên Hiệp</a></li>
+                <li class="nav-dropdown__item"><a class="nav-dropdown__link" href="#/library" data-genre="Kiếm Hiệp">Kiếm Hiệp</a></li>
+                <li class="nav-dropdown__item"><a class="nav-dropdown__link" href="#/library" data-genre="Ngôn Tình">Ngôn Tình</a></li>
+                <li class="nav-dropdown__item"><a class="nav-dropdown__link" href="#/library" data-genre="Huyền Huyễn">Huyền Huyễn</a></li>
+                <li class="nav-dropdown__item"><a class="nav-dropdown__link" href="#/library" data-genre="Xuyên Không">Xuyên Không</a></li>
+                <li class="nav-dropdown__item"><a class="nav-dropdown__link" href="#/library" data-genre="Trọng Sinh">Trọng Sinh</a></li>
+                <li class="nav-dropdown__item"><a class="nav-dropdown__link" href="#/library" data-genre="Đô Thị">Đô Thị</a></li>
+                <li class="nav-dropdown__item"><a class="nav-dropdown__link" href="#/library" data-genre="Điền Văn">Điền Văn</a></li>
+                <li class="nav-dropdown__item"><a class="nav-dropdown__link" href="#/library" data-genre="Lịch Sử">Lịch Sử</a></li>
+                <li class="nav-dropdown__item"><a class="nav-dropdown__link" href="#/library" data-genre="Hệ Thống">Hệ Thống</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="nav__item nav__item--dropdown" id="ranking-dropdown-wrap">
+            <button class="nav__link nav__toggle" id="btn-ranking-toggle" type="button">
+              <span>Xếp hạng</span>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="margin-left:4px;">
+                <path d="M6 9l6 6 6-6"/>
+              </svg>
+            </button>
+            <div id="rankingMenu" class="nav-dropdown ranking-dropdown" style="display:none;">
+              <div class="ranking-dropdown-grid">
+                <div class="ranking-dropdown-col">
+                  <a class="nav-dropdown__link ranking-link" href="#/" data-rank-sort="views_all">
+                    <i class="fa-regular fa-eye"></i> <span>Top all</span>
+                  </a>
+                  <a class="nav-dropdown__link ranking-link" href="#/" data-rank-sort="views_month">
+                    <i class="fa-regular fa-eye"></i> <span>Top tháng</span>
+                  </a>
+                  <a class="nav-dropdown__link ranking-link" href="#/" data-rank-sort="views_week">
+                    <i class="fa-regular fa-eye"></i> <span>Top tuần</span>
+                  </a>
+                  <a class="nav-dropdown__link ranking-link" href="#/" data-rank-sort="views_day">
+                    <i class="fa-regular fa-eye"></i> <span>Top ngày</span>
+                  </a>
+                  <a class="nav-dropdown__link ranking-link" href="#/" data-rank-sort="follow">
+                    <i class="fa-regular fa-bookmark"></i> <span>Top Follow</span>
+                  </a>
+                </div>
+                <div class="ranking-dropdown-col">
+                  <a class="nav-dropdown__link ranking-link text-orange" href="#/" data-rank-sort="full">
+                    <i class="fa-solid fa-chart-simple"></i> <span>Truyện full</span>
+                  </a>
+                  <a class="nav-dropdown__link ranking-link" href="#/" data-rank-sort="rating">
+                    <i class="fa-regular fa-thumbs-up"></i> <span>Yêu Thích</span>
+                  </a>
+                  <a class="nav-dropdown__link ranking-link" href="#/" data-rank-sort="updated">
+                    <i class="fa-solid fa-rotate"></i> <span>Mới cập nhật</span>
+                  </a>
+                  <a class="nav-dropdown__link ranking-link" href="#/" data-rank-sort="new">
+                    <i class="fa-solid fa-cloud"></i> <span>Truyện mới</span>
+                  </a>
+                  <a class="nav-dropdown__link ranking-link" href="#/" data-rank-sort="chapters">
+                    <i class="fa-solid fa-list-ol"></i> <span>Số chapter</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <a href="#/library" class="nav__link" data-route="library">Truyện full</a>
+        </nav>
+      </div>
+
+      <!-- Search Bar -->
+      <form class="search__header-wrapper" id="header-search-form" role="search" style="display:flex; align-items:center; position:relative;">
+        <input type="text" id="header-search-input" placeholder="Tìm kiếm truyện, tác giả..." style="padding: 8px 36px 8px 14px; border: 1px solid var(--border); border-radius: 99px; font-size: 13.5px; width: 220px; outline: none; background: var(--bg-soft); color: var(--ink);">
+        <button type="submit" aria-label="Tìm kiếm" style="position: absolute; right: 12px; background: none; border: none; color: var(--ink-2); cursor: pointer;">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+      </form>
+
+      <!-- Theme Mode Toggle & User Auth Container -->
+      <div class="header-actions-group" style="display:flex; align-items:center; gap:10px;">
+        <button class="theme-toggle-btn" id="btn-theme-toggle" title="Chuyển chế độ Sáng / Tối" aria-label="Toggle dark/light mode">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+
+        <div id="user-auth-container" style="display:flex; align-items:center; gap:8px;">
+          <button class="btn btn--outline" id="btn-open-auth" style="padding: 7px 16px; border-radius: 99px; font-size: 13px; font-weight: 600;">
+            <i class="fa-solid fa-user-circle"></i> Đăng nhập
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+
+  
+
+  <!-- =================================================================
+       MAIN APPLICATION VIEWS CONTAINER
+       ================================================================= -->
+  <main class="main-container">
+
+    <!-- =================================================================
+         VIEW 1: TRANG CHỦ (HOMEPAGE)
+         ================================================================= -->
+    <section class="view-section active" id="view-home">
+      <!-- 1. DYNAMIC TALL HERO SLIDER SECTION (CAO & TỰ ĐỘNG CHUYỂN SLIDE) -->
+      <section class="slider-section" id="hero-slider-section">
+        <div class="container hero-slider-outer">
+          <div class="hero-slider-wrapper">
+            <div class="hero-slider-track" id="home-featured-slider">
+              <!-- Rendered via JS -->
+            </div>
+            
+            <button class="slider-arrow slider-arrow--prev" id="slider-btn-prev" aria-label="Truyện trước">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button class="slider-arrow slider-arrow--next" id="slider-btn-next" aria-label="Truyện kế tiếp">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+
+            <div class="slider-dots" id="slider-dots"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. BẢNG XẾP HẠNG (RANKING) -->
+      <section class="ranking" aria-labelledby="ranking-title" style="padding: 24px 0;">
+        <div class="container">
+          <div class="section__header ranking-section-header" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom: 18px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <i class="fa-solid fa-trophy" style="color:#f59e0b; font-size: 20px;"></i>
+              <h2 id="ranking-title" style="font-size: 20px; font-weight: 800; color: var(--ink); margin: 0;">Bảng xếp hạng</h2>
+            </div>
+            <div class="ranking-capsule-tabs" id="home-ranking-tabs" role="tablist">
+              <button class="rank-tab-pill active" data-rank-sort="views_all"><i class="fa-solid fa-fire text-orange"></i> Top All</button>
+              <button class="rank-tab-pill" data-rank-sort="chapters"><i class="fa-solid fa-list-ol"></i> Số Chapter</button>
+              <button class="rank-tab-pill" data-rank-sort="rating"><i class="fa-regular fa-thumbs-up"></i> Yêu Thích</button>
+              <button class="rank-tab-pill" data-rank-sort="updated"><i class="fa-solid fa-rotate"></i> Mới Cập Nhật</button>
+              <button class="rank-tab-pill" data-rank-sort="full"><i class="fa-solid fa-check-circle" style="color:#10b981;"></i> Truyện Full</button>
+            </div>
+          </div>
+
+          <ol class="ranking__grid" id="home-ranking-grid"></ol>
+        </div>
+      </section>
+
+      <!-- 3. KHÁM PHÁ THEO THỂ LOẠI (CATX SECTION) -->
+      <section class="catx section" style="padding: 20px 0;">
+        <div class="container">
+          <div class="section__header" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom: 16px;">
+            <h2 style="font-size: 20px; font-weight: 800; color: var(--ink); margin: 0;">Khám phá theo thể loại</h2>
+            <div class="catx__tabs" id="catx-genre-tabs" style="display:flex; gap: 8px; flex-wrap:wrap;">
+              <button class="genre-pill active" data-genre="">Tất Cả</button>
+              <button class="genre-pill" data-genre="Tiên Hiệp">Tiên Hiệp</button>
+              <button class="genre-pill" data-genre="Kiếm Hiệp">Kiếm Hiệp</button>
+              <button class="genre-pill" data-genre="Ngôn Tình">Ngôn Tình</button>
+              <button class="genre-pill" data-genre="Huyền Huyễn">Huyền Huyễn</button>
+              <button class="genre-pill" data-genre="Đô Thị">Đô Thị</button>
+            </div>
+          </div>
+
+          <div class="catx-panel" id="home-novels-grid"></div>
+        </div>
+      </section>
+
+      <!-- 4. SHOPEE AFFILIATE BANNER -->
+      <div class="container">
+        <div class="shopee-affiliate-banner" id="tang-bao-cac-banner">
+          <div>
+            <h3 class="sab-title"><i class="fa-solid fa-gift text-orange"></i> Ưu Đãi Hội Viên &amp; Pháp Bảo Shopee</h3>
+            <p class="sab-sub">Bàn phím cơ, trà đạo, đèn đọc sách chống mỏi mắt và phụ kiện độc quyền cho độc giả Webnovel.</p>
+          </div>
+          <button class="sab-btn" id="btn-banner-open-treasure">Xem Ưu Đãi <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         VIEW 2: THƯ VIỆN & TÌM KIẾM (LIBRARY CATALOG)
+         ================================================================= -->
+    <section class="view-section" id="view-library">
+      <div class="library-grid-wrapper">
+        <div class="library-controls-bar">
+          <div>
+            <h1 id="library-heading" style="font-size: 22px; font-weight: 800; color: var(--ink); margin: 0 0 4px;">Tất Cả Linh Thư</h1>
+            <p id="library-sub" style="font-size: 13px; color: var(--ink-2); margin: 0;">Khám phá kho truyện chữ khổng lồ cập nhật liên tục</p>
+          </div>
+
+          <div style="display:flex; gap: 10px; align-items:center; flex-wrap:wrap;">
+            <input type="text" id="library-search-input" placeholder="Tìm theo tên hoặc tác giả..." class="cultivation-select" style="min-width: 220px;">
+            <select id="library-status-filter" class="cultivation-select">
+              <option value="">Tất cả trạng thái</option>
+              <option value="Đang">Đang ra</option>
+              <option value="Full">Full</option>
+            </select>
+            <select id="library-sort-filter" class="cultivation-select">
+              <option value="updated">Mới cập nhật</option>
+              <option value="views">Lượt xem cao nhất</option>
+              <option value="chapters">Nhiều chương nhất</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="catx-panel" id="library-novels-grid"></div>
+
+        <div class="pagination-bar" id="library-pagination"></div>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         VIEW 3: CHI TIẾT TRUYỆN (BOOK DETAIL)
+         ================================================================= -->
+    <section class="view-section" id="view-detail">
+      <div class="book-detail-wrapper">
+        <!-- Breadcrumbs -->
+        <nav style="font-size: 13px; color: var(--ink-2); margin-bottom: 16px;">
+          <a href="#/" style="color: var(--brand); text-decoration:none;">Trang chủ</a> &gt; 
+          <span id="detail-breadcrumb-title" style="color: var(--ink);">Chi tiết truyện</span>
+        </nav>
+
+        <!-- Book Detail Card -->
+        <div class="book-detail">
+          <figure class="book-detail__cover">
+            <img src="" alt="Novel Cover" id="detail-cover-img">
+            <div class="book-detail__status"><span class="status__text" id="detail-status-badge">Đang ra</span></div>
+          </figure>
+
+          <div class="book-detail__body">
+            <h1 class="book-detail__title" id="detail-title">Tên Truyện</h1>
+
+            <div class="book-detail__row">
+              <p class="book-detail__author">
+                <i class="fa-solid fa-pen-nib"></i> Tác giả: <strong id="detail-author" style="color: var(--ink);">Đang cập nhật</strong>
+              </p>
+              <div class="book-detail__stats">
+                <div class="book-detail__stat">
+                  <i class="fa-solid fa-star" style="color:#f59e0b;"></i> <strong id="detail-rating">4.8</strong>
+                </div>
+                <div class="book-detail__stat">
+                  <i class="fa-solid fa-book-open"></i> <strong id="detail-chapters-count">0</strong> chương
+                </div>
+                <div class="book-detail__stat">
+                  <i class="fa-solid fa-eye"></i> <strong id="detail-views">0</strong> lượt đọc
+                </div>
+              </div>
+            </div>
+
+            <!-- Novel Genres List -->
+            <div class="book-detail__genres" id="detail-genres-wrap" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;"></div>
+
+            <div class="book-detail__cta" style="margin-top: 18px;">
+              <button class="btn btn--primary" id="btn-read-first"><i class="fa-solid fa-book-open"></i> Đọc Từ Đầu</button>
+              <button class="btn btn--outline" id="btn-read-continue"><i class="fa-solid fa-bookmark"></i> <span id="btn-read-continue-text">Đọc Tiếp</span></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary & Chapters Tabs -->
+        <div class="book-detail__tabs-wrapper">
+          <div class="detail-capsule-tabs" role="tablist">
+            <button id="btn-tab-summary" class="detail-tab-pill is-active">Giới Thiệu</button>
+            <button id="btn-tab-chapters" class="detail-tab-pill">Danh Sách Chương</button>
+          </div>
+
+          <div id="panel-summary">
+            <div class="book-detail__summary" id="detail-synopsis-text">Đang tải tóm tắt...</div>
+          </div>
+
+          <div id="panel-chapters" hidden>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 14px; gap: 10px; flex-wrap:wrap;">
+              <input type="text" id="chapter-filter-input" placeholder="Tìm theo tên hoặc số chương..." class="cultivation-select chapter-search-input" style="max-width: 300px; width:100%;">
+              <span style="font-size: 13px; color: var(--ink-2);" id="detail-chapters-sub">0 chương</span>
+            </div>
+            <div class="chapter-list-grid" id="detail-chapter-list"></div>
+            <div class="pagination-bar" id="detail-chapter-pagination"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================
+         VIEW 4: TRÌNH ĐỌC TRUYỆN (READER)
+         ================================================================= -->
+    <section class="view-section" id="view-reader">
+      <div class="reader-container">
+        <div class="reader-header">
+          <a href="#/novel/" class="reader-novel-title" id="reader-novel-title"><i class="fa-solid fa-arrow-left"></i> Tên Truyện</a>
+          <h1 class="reader-chapter-title" id="reader-chapter-heading">Chương 1</h1>
+
+          <div class="reader-toolbar">
+            <a href="javascript:void(0)" class="reader-btn" id="btn-prev-chap-top"><i class="fa-solid fa-chevron-left"></i> Chương trước</a>
+            <button class="reader-btn" id="btn-font-dec"><i class="fa-solid fa-minus"></i> A</button>
+            <button class="reader-btn" id="btn-font-inc"><i class="fa-solid fa-plus"></i> A</button>
+            <button class="reader-btn" id="btn-reader-theme"><i class="fa-solid fa-circle-half-stroke"></i> Giao diện</button>
+            <a href="javascript:void(0)" class="reader-btn" id="btn-next-chap-top">Chương sau <i class="fa-solid fa-chevron-right"></i></a>
+          </div>
+        </div>
+
+        <article class="reader-article" id="reader-article">
+          <div class="reader-content" id="chapter-c">Đang tải nội dung chương...</div>
+        </article>
+
+        <div class="reader-toolbar" style="margin-top: 32px;">
+          <a href="javascript:void(0)" class="reader-btn" id="btn-prev-chap"><i class="fa-solid fa-chevron-left"></i> Chương trước</a>
+          <a href="#/novel/" class="reader-btn" id="btn-back-detail"><i class="fa-solid fa-list"></i> Mục lục</a>
+          <a href="javascript:void(0)" class="reader-btn" id="btn-next-chap">Chương sau <i class="fa-solid fa-chevron-right"></i></a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =================================================================
+       SITE FOOTER (KHOTRUYENCHU)
+       ================================================================= -->
+  <footer class="site-footer" role="contentinfo" style="background: var(--bg-soft); border-top: 1px solid var(--border); padding: 40px 0 24px; margin-top: 48px;">
+    <div class="container" style="max-width: var(--container-max); margin: 0 auto; padding: 0 16px;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px; margin-bottom: 32px;">
+        <div>
+          <a href="#/"><img src="assets/khotruyenchu.svg?v=9.0" alt="KhoTruyenChu" style="height: 36px; width: auto; margin-bottom: 12px; display: block;"></a>
+          <p style="font-size: 13px; color: var(--ink-2); line-height: 1.6; margin: 0;">KhoTruyenChu - Nền tảng đọc truyện chữ online tốc độ cao hàng đầu. Kho tiểu thuyết đồ sộ Tiên Hiệp, Kiếm Hiệp, Ngôn Tình, Huyền Huyễn chất lượng cao cập nhật chương mới liên tục mỗi ngày.</p>
+        </div>
+        <div>
+          <h4 style="font-size: 14px; font-weight: 700; color: var(--ink); margin: 0 0 12px;">Danh Mục Nổi Bật</h4>
+          <ul style="list-style: none; padding: 0; margin: 0; font-size: 13px; color: var(--ink-2); line-height: 2;">
+            <li><a href="#/library" style="color: inherit; text-decoration:none;">Truyện Tiên Hiệp Chọn Lọc</a></li>
+            <li><a href="#/library" style="color: inherit; text-decoration:none;">Truyện Ngôn Tình Sắc Nét</a></li>
+            <li><a href="#/library" style="color: inherit; text-decoration:none;">Truyện Kiếm Hiệp Đặc Sắc</a></li>
+            <li><a href="#/ranking" style="color: inherit; text-decoration:none;">Bảng Xếp Hạng Đọc Nhiều</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="font-size: 14px; font-weight: 700; color: var(--ink); margin: 0 0 12px;">Chính Sách &amp; Hỗ Trợ</h4>
+          <ul style="list-style: none; padding: 0; margin: 0; font-size: 13px; color: var(--ink-2); line-height: 2;">
+            <li><a href="#/about" style="color: inherit; text-decoration:none;">Giới thiệu KhoTruyenChu</a></li>
+            <li><a href="#/affiliate" style="color: inherit; text-decoration:none;">Chính sách Affiliate Shopee</a></li>
+            <li><a href="#/privacy" style="color: inherit; text-decoration:none;">Chính sách bảo mật</a></li>
+            <li><a href="#/tos" style="color: inherit; text-decoration:none;">Điều khoản sử dụng</a></li>
+          </ul>
+        </div>
+      </div>
+      <div style="border-top: 1px solid var(--border); padding-top: 18px; text-align: center; font-size: 12px; color: var(--ink-2);">
+        &copy; 2026 KhoTruyenChu. Nền tảng đọc truyện chữ online nhanh &amp; mượt mà nhất.
+      </div>
+    </div>
+  </footer>
+
+  <!-- =================================================================
+       USER AUTH MODAL (LOGIN / REGISTER)
+       ================================================================= -->
+  <div class="auth-modal-backdrop" id="auth-modal" style="display:none;">
+    <div class="auth-modal-box">
+      <div class="auth-modal-header">
+        <h3 id="auth-modal-title">Đăng Nhập Tài Khoản</h3>
+        <button class="btn-close-modal" id="btn-close-auth">&times;</button>
+      </div>
+      <div class="auth-modal-body">
+        <div class="auth-tab-switch">
+          <button class="active" id="tab-login">Đăng Nhập</button>
+          <button id="tab-register">Đăng Ký</button>
+        </div>
+
+        <form id="form-auth-login">
+          <div class="auth-input-group">
+            <label for="login-username">Tên đăng nhập hoặc Email</label>
+            <input type="text" id="login-username" required placeholder="Nhập tên tài khoản...">
+          </div>
+          <div class="auth-input-group">
+            <label for="login-password">Mật khẩu</label>
+            <input type="password" id="login-password" required placeholder="Nhập mật khẩu...">
+          </div>
+          <div class="auth-msg-box" id="login-msg"></div>
+          <button type="submit" class="btn-auth-submit">Đăng Nhập Ngay</button>
+        </form>
+
+        <form id="form-auth-register" style="display:none;">
+          <div class="auth-input-group">
+            <label for="reg-username">Tên đăng nhập</label>
+            <input type="text" id="reg-username" required placeholder="Viết liền không dấu...">
+          </div>
+          <div class="auth-input-group">
+            <label for="reg-email">Email</label>
+            <input type="email" id="reg-email" required placeholder="email@domain.com">
+          </div>
+          <div class="auth-input-group">
+            <label for="reg-password">Mật khẩu</label>
+            <input type="password" id="reg-password" required placeholder="Tối thiểu 6 ký tự...">
+          </div>
+          <div class="auth-msg-box" id="reg-msg"></div>
+          <button type="submit" class="btn-auth-submit" style="background:#ea580c;">Tạo Tài Khoản</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Client Application Script -->
+  <script src="js/client.js?v=9.5"></script>
+</body>
+</html>

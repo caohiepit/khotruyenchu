@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 48" fill="none" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bookGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0866FF"/>
+      <stop offset="100%" stop-color="#004cd8"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF7E42"/>
+      <stop offset="100%" stop-color="#FF5100"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD700"/>
+      <stop offset="100%" stop-color="#FFA500"/>
+    </linearGradient>
+    <filter id="glow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="2" flood-color="#0866ff" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- ICON: Magic Open Book -->
+  <g transform="translate(2, 4)" filter="url(#glow)">
+    <path d="M22 36 C22 36 16 34 7 34 C2.5 34 2 36 2 37 L2 12 C2 10.5 4.5 9.5 8.5 9.5 C15.5 9.5 19.5 11 22 13 C24.5 11 28.5 9.5 35.5 9.5 C39.5 9.5 42 10.5 42 12 L42 37 C42 36 41.5 34 37 34 C28 34 22 36 22 36 Z" fill="#ffffff" stroke="#0866FF" stroke-width="1.8" stroke-linejoin="round"/>
+    
+    <!-- Left Page -->
+    <path d="M22 36 C18 33.5 13 32.5 7 32.5 C3.5 32.5 2 33.5 2 33.5 L2 11 C2 11 4.5 10 8.5 10 C15.5 10 19.5 12 22 14 Z" fill="url(#bookGrad)"/>
+    
+    <!-- Right Page -->
+    <path d="M22 36 C26 33.5 31 32.5 37 32.5 C40.5 32.5 42 33.5 42 33.5 L42 11 C42 11 39.5 10 35.5 10 C28.5 10 24.5 12 22 14 Z" fill="url(#orangeGrad)"/>
+
+    <!-- Gold Bookmark Ribbon -->
+    <path d="M22 12 L22 30 L24.5 27.5 L27 30 L27 12 Z" fill="url(#goldGrad)"/>
+
+    <!-- Small Star Sparkle -->
+    <path d="M38 7 L39 9 L41 10 L39 11 L38 13 L37 11 L35 10 L37 9 Z" fill="#FFD700"/>
+  </g>
+
+  <!-- LOGO TEXT: KhoTruyenChu (viết liền hoàn toàn, không dấu cách, không dấu) -->
+  <g transform="translate(52, 34)">
+    <text font-family="'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif" font-weight="900" font-size="28" letter-spacing="-0.3"><tspan fill="#0866FF">Kho</tspan><tspan fill="#FF7E42">Truyen</tspan><tspan fill="#0866FF" class="logo-chu-text">Chu</tspan></text>
+  </g>
+</svg>

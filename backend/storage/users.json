@@ -1,0 +1,22 @@
+[
+  {
+    "id": "usr-1",
+    "username": "TieuViem",
+    "email": "tieuviem@tu-tien.vn",
+    "realm": "Kim Đan Kỳ",
+    "exp": 2800,
+    "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=TieuViem",
+    "created_at": "2026-10-31T10:35:10.730764+07:00",
+    "updated_at": "2026-10-31T10:35:10.730764+07:00"
+  },
+  {
+    "id": "usr-371800",
+    "username": "DaoHuuThang",
+    "email": "thang@tu-tien.vn",
+    "realm": "Phàm Nhân",
+    "exp": 35,
+    "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=DaoHuuThang",
+    "created_at": "2026-10-31T10:38:36.4193718+07:00",
+    "updated_at": "2026-10-31T10:38:53.8800396+07:00"
+  }
+]

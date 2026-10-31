@@ -1,0 +1,57 @@
+[
+  {
+    "id": "aff-570600",
+    "title": "B�n Ph�m Co Tu Ti�n Led RGB Switch �m �i",
+    "affiliate_url": "https://shopee.vn/search?keyword=ban%20phim%20co",
+    "image_url": "https://cf.shopee.vn/file/vn-11134207-7r98o-ls5h19875e5f0d",
+    "price_original": "450.000d",
+    "price_discount": "289.000d",
+    "tag": "Flash Sale",
+    "position": "ticker",
+    "is_active": true,
+    "clicks_count": 0,
+    "created_at": "2026-10-31T10:35:40.6805706+07:00"
+  },
+  {
+    "id": "aff-1",
+    "title": "Bàn Phím Cơ Tu Tiên Led RGB Switch Êm Ái",
+    "affiliate_url": "https://shopee.vn/search?keyword=ban%20phim%20co",
+    "image_url": "https://cf.shopee.vn/file/vn-11134207-7r98o-ls5h19875e5f0d",
+    "price_original": "450.000đ",
+    "price_discount": "289.000đ",
+    "tag": "Flash Sale",
+    "category": "electronics",
+    "position": "ticker",
+    "is_active": true,
+    "clicks_count": 24,
+    "created_at": "2026-10-31T10:35:10.7281942+07:00"
+  },
+  {
+    "id": "aff-2",
+    "title": "Trà Ô Long Thiết Quan Âm Hảo Hạng Đọc Truyện",
+    "affiliate_url": "https://shopee.vn/search?keyword=tra%20thiet%20quan%20am",
+    "image_url": "https://cf.shopee.vn/file/vn-11134207-7r98o-lt0i23948381bb",
+    "price_original": "180.000đ",
+    "price_discount": "125.000đ",
+    "tag": "Tu Tiên Trà",
+    "category": "tea",
+    "position": "ticker",
+    "is_active": true,
+    "clicks_count": 18,
+    "created_at": "2026-10-31T10:35:10.7281942+07:00"
+  },
+  {
+    "id": "aff-3",
+    "title": "Đèn Đọc Sách Chống Cận Thị Bảo Vệ Mắt Ban Đêm",
+    "affiliate_url": "https://shopee.vn/search?keyword=den%20doc%20sach%20chong%20can",
+    "image_url": "https://cf.shopee.vn/file/vn-11134207-7r98o-lt9j348572834a",
+    "price_original": "210.000đ",
+    "price_discount": "149.000đ",
+    "tag": "Khuyên Dùng",
+    "category": "lamp",
+    "position": "ticker",
+    "is_active": true,
+    "clicks_count": 35,
+    "created_at": "2026-10-31T10:35:10.7281942+07:00"
+  }
+]

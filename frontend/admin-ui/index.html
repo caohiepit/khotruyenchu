@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comics Admin Portal - Quản Lý & Giám Sát Dữ Liệu Crawl</title>
+  <meta name="description" content="Hệ thống quản trị và giám sát dữ liệu truyện cào thời gian thực vào PostgreSQL 16 & Redis">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-bolt-lightning"></i>
+        </div>
+        <div class="brand-text">
+          <h2>COMICS<span>OS</span></h2>
+          <span class="badge-sub">Admin Engine v2.0</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <a href="#overview" class="nav-item active" data-tab="overview">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>Tổng Quan (Overview)</span>
+        </a>
+        <a href="#queue" class="nav-item" data-tab="queue">
+          <i class="fa-solid fa-list-check"></i>
+          <span>Hàng Đợi Cào (Queue)</span>
+          <span class="nav-pill amber" id="nav-queue-count">0</span>
+        </a>
+        <a href="#novels" class="nav-item" data-tab="novels">
+          <i class="fa-solid fa-book-bookmark"></i>
+          <span>Kho Truyện Đã Cào</span>
+          <span class="nav-pill" id="nav-novels-count">0</span>
+        </a>
+        <a href="#sources" class="nav-item" data-tab="sources">
+          <i class="fa-solid fa-globe"></i>
+          <span>Nguồn Web & Quét Tự Động</span>
+        </a>
+        <a href="#affiliate" class="nav-item" data-tab="affiliate">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span>Shopee Affiliate</span>
+          <span class="nav-pill green" id="nav-affiliate-count">0</span>
+        </a>
+        <a href="#database" class="nav-item" data-tab="database">
+          <i class="fa-solid fa-database"></i>
+          <span>Hạ Tầng Database</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="db-status-badge online">
+          <span class="pulse-dot"></span>
+          <span>PostgreSQL 16: Active</span>
+        </div>
+        <div class="api-target">
+          <small>API Endpoint:</small>
+          <span id="api-endpoint-text">http://localhost:8000/api</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-wrapper">
+      <!-- Top Navbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 id="page-title">Dashboard Tổng Quan</h1>
+          <p class="subtitle">Giám sát lượng dữ liệu cào truyện thời gian thực trong <code>comics_db</code></p>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-secondary" id="btn-refresh" title="Làm mới dữ liệu">
+            <i class="fa-solid fa-arrows-rotate" id="refresh-icon"></i>
+            <span>Làm Mới</span>
+          </button>
+          <a href="/" target="_blank" class="btn btn-outline" title="Mở Giao diện Đọc Truyện (Client UI)">
+            <i class="fa-solid fa-book-open-reader"></i>
+            <span>Site Client</span>
+          </a>
+          <a href="http://localhost:8080" target="_blank" class="btn btn-outline" title="Mở Adminer Quản trị DB trực tiếp">
+            <i class="fa-solid fa-table-cells"></i>
+            <span>Adminer Web UI</span>
+          </a>
+          <button class="btn btn-primary" id="btn-quick-crawl">
+            <i class="fa-solid fa-list-ol"></i>
+            <span>Mở Hàng Đợi Cào</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Scrollable Content -->
+      <div class="content-body">
+        
+        <!-- SECTION 1: OVERVIEW METRICS -->
+        <section class="tab-pane active" id="pane-overview">
+          <!-- Metric Stat Cards -->
+          <div class="metrics-grid">
+            <div class="metric-card cyan">
+              <div class="metric-icon">
+                <i class="fa-solid fa-book-journal-whills"></i>
+              </div>
+              <div class="metric-info">
+                <span class="metric-label">Tổng Truyện Trong DB</span>
+                <h3 class="metric-value" id="stat-total-novels">--</h3>
+                <span class="metric-hint"><i class="fa-solid fa-check"></i> Đã đồng bộ vào PostgreSQL</span>
+              </div>
+            </div>
+
+            <div class="metric-card violet">
+              <div class="metric-icon">
+                <i class="fa-solid fa-file-lines"></i>
+              </div>
+              <div class="metric-info">
+                <span class="metric-label">Tổng Số Chương</span>
+                <h3 class="metric-value" id="stat-total-chapters">--</h3>
+                <span class="metric-hint"><i class="fa-solid fa-microchip"></i> Nén LZ4 TOAST PostgreSQL</span>
+              </div>
+            </div>
+
+            <div class="metric-card amber">
+              <div class="metric-icon">
+                <i class="fa-solid fa-list-check"></i>
+              </div>
+              <div class="metric-info">
+                <span class="metric-label">Hàng Đợi Cào (Queue)</span>
+                <h3 class="metric-value" id="stat-queue-pending">--</h3>
+                <span class="metric-hint" id="stat-queue-hint">Chờ cào vào DB</span>
+              </div>
+            </div>
+
+            <div class="metric-card emerald">
+              <div class="metric-icon">
+                <i class="fa-solid fa-spell-check"></i>
+              </div>
+              <div class="metric-info">
+                <span class="metric-label">Tổng Số Từ Đã Cào</span>
+                <h3 class="metric-value" id="stat-total-words">--</h3>
+                <span class="metric-hint"><i class="fa-solid fa-font"></i> Đã lọc sạch watermark</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Queue Quick Summary Banner -->
+          <div class="queue-status-banner">
+            <div class="banner-left">
+              <div class="worker-pulse" id="worker-pulse-indicator"></div>
+              <div>
+                <strong id="worker-status-title">Tiến trình Hàng Đợi (Queue Worker): Tạm dừng</strong>
+                <span id="worker-status-desc">Có 0 truyện đang chờ trong hàng đợi. Bấm vào tab "Hàng Đợi Cào" để kích hoạt.</span>
+              </div>
+            </div>
+            <div class="banner-right">
+              <button class="btn btn-primary btn-sm" id="btn-go-to-queue">
+                <i class="fa-solid fa-arrow-right"></i> Đến Quản Lý Hàng Đợi
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Action & Recent Updates Section -->
+          <div class="dashboard-row">
+            <!-- Left: Quick Universal Crawler Card -->
+            <div class="panel panel-crawl-form">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <i class="fa-solid fa-bolt-lightning text-cyan"></i>
+                  <h3>Dán Link & Tự Động Cào Liên Tục</h3>
+                </div>
+                <span class="badge-status">Universal Auto Ingestion</span>
+              </div>
+              <div class="panel-body">
+                <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">
+                  Hỗ trợ link <strong>truyện lẻ</strong> hoặc <strong>danh mục</strong> từ bất kỳ nguồn nào (Truyện Full, Tàng Thư Viện...). Hệ thống tự nhận diện nguồn, nạp vào hàng đợi và <strong>Worker nền tự động cào liên tục mà không cần trigger tay</strong>!
+                </p>
+                <form id="crawler-quick-form">
+                  <div class="form-group">
+                    <label for="crawl-url"><i class="fa-solid fa-link"></i> Dán Link Truyện hoặc Link Danh Mục:</label>
+                    <input type="url" id="crawl-url" required placeholder="VD: https://truyenfulldich.top/tao-hoa-chi-mon hoặc https://truyenfull.live/..." value="https://truyenfulldich.top/tao-hoa-chi-mon">
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group col-6">
+                      <label for="crawl-limit"><i class="fa-solid fa-list-ol"></i> Giới hạn chương (0 = Cào trọn bộ):</label>
+                      <input type="number" id="crawl-limit" min="0" max="5000" value="0">
+                    </div>
+                    <div class="form-group col-6">
+                      <label for="crawl-pages"><i class="fa-solid fa-file"></i> Số trang quét (nếu là danh mục):</label>
+                      <input type="number" id="crawl-pages" min="1" max="10" value="2">
+                    </div>
+                  </div>
+
+                  <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-block" id="btn-submit-crawl">
+                      <i class="fa-solid fa-play"></i>
+                      <span>Khởi Chạy Cào Tự Động Vào DB</span>
+                    </button>
+                  </div>
+                </form>
+
+                <div id="crawl-job-status" class="crawl-job-box hidden">
+                  <div class="job-header">
+                    <span class="job-indicator"><span class="spin-icon"><i class="fa-solid fa-circle-notch fa-spin"></i></span> Tiến trình Worker</span>
+                    <span class="job-badge" id="job-badge-status">Running</span>
+                  </div>
+                  <p class="job-msg" id="job-msg-text">Worker đang tự động cào liên tục trong nền...</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: System & DB Status -->
+            <div class="panel panel-system-info">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <i class="fa-solid fa-server text-emerald"></i>
+                  <h3>Thông Tin Cụm Dịch Vụ</h3>
+                </div>
+              </div>
+              <div class="panel-body">
+                <div class="infra-list">
+                  <div class="infra-item">
+                    <div class="infra-icon"><i class="fa-solid fa-database text-cyan"></i></div>
+                    <div class="infra-details">
+                      <strong>PostgreSQL 16 Engine</strong>
+                      <span>Container: <code>comics_postgres</code> | Port <code>5432</code></span>
+                    </div>
+                    <span class="badge-tag green">Running</span>
+                  </div>
+
+                  <div class="infra-item">
+                    <div class="infra-icon"><i class="fa-solid fa-bolt text-amber"></i></div>
+                    <div class="infra-details">
+                      <strong>Redis 7 In-Memory Cache</strong>
+                      <span>Container: <code>comics_redis</code> | Port <code>6379</code></span>
+                    </div>
+                    <span class="badge-tag green">Running</span>
+                  </div>
+
+                  <div class="infra-item">
+                    <div class="infra-icon"><i class="fa-solid fa-window-maximize text-violet"></i></div>
+                    <div class="infra-details">
+                      <strong>Adminer Database Web UI</strong>
+                      <span>Container: <code>comics_adminer</code> | Port <code>8080</code></span>
+                    </div>
+                    <a href="http://localhost:8080" target="_blank" class="badge-tag blue">Mở Tab <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                  </div>
+
+                  <div class="infra-item">
+                    <div class="infra-icon"><i class="fa-solid fa-file-zipper text-cyan"></i></div>
+                    <div class="infra-details">
+                      <strong>Nén Tự Động Nội Dung (TOAST LZ4)</strong>
+                      <span>Tiết kiệm ~70% dung lượng đĩa và tăng tốc query</span>
+                    </div>
+                    <span class="badge-tag cyan">Enabled</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 2: QUEUE-BASED MASS CRAWLER -->
+        <section class="tab-pane" id="pane-queue">
+          <!-- Queue Metrics Cards -->
+          <div class="metrics-grid">
+            <div class="metric-card amber">
+              <div class="metric-icon"><i class="fa-solid fa-hourglass-start"></i></div>
+              <div class="metric-info">
+                <span class="metric-label">Đang Chờ Cào (Pending)</span>
+                <h3 class="metric-value" id="queue-count-pending">0</h3>
+                <span class="metric-hint">Đã có link trong hàng đợi</span>
+              </div>
+            </div>
+
+            <div class="metric-card cyan">
+              <div class="metric-icon"><i class="fa-solid fa-spinner fa-spin"></i></div>
+              <div class="metric-info">
+                <span class="metric-label">Đang Xử Lý (Crawling)</span>
+                <h3 class="metric-value" id="queue-count-crawling">0</h3>
+                <span class="metric-hint">Tiến trình đang tải chương</span>
+              </div>
+            </div>
+
+            <div class="metric-card emerald">
+              <div class="metric-icon"><i class="fa-solid fa-circle-check"></i></div>
+              <div class="metric-info">
+                <span class="metric-label">Đã Xong (Completed)</span>
+                <h3 class="metric-value" id="queue-count-completed">0</h3>
+                <span class="metric-hint">Đã nạp đủ vào novels & chapters</span>
+              </div>
+            </div>
+
+            <div class="metric-card violet">
+              <div class="metric-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <div class="metric-info">
+                <span class="metric-label">Thất Bại (Failed)</span>
+                <h3 class="metric-value" id="queue-count-failed">0</h3>
+                <span class="metric-hint">Có thể bấm cào lại</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Realtime Telemetry Monitor -->
+          <div class="panel live-monitor-panel" id="live-telemetry-box" style="margin-bottom: 24px; border-color: rgba(6, 182, 212, 0.4); background: linear-gradient(180deg, rgba(15, 23, 42, 0.9) 0%, rgba(8, 145, 178, 0.08) 100%);">
+            <div class="panel-header" style="border-bottom: 1px solid rgba(6, 182, 212, 0.2);">
+              <div class="panel-title">
+                <span class="pulse-dot" style="background: #06b6d4; box-shadow: 0 0 10px #06b6d4;"></span>
+                <h3 style="color: #38bdf8;"><i class="fa-solid fa-satellite-dish"></i> Giám Sát Cào Realtime (Live Worker Telemetry)</h3>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <span class="badge-tag green" id="live-worker-status-badge"><i class="fa-solid fa-play"></i> Worker Active</span>
+                <span style="font-size: 0.78rem; color: var(--text-muted);" id="live-refresh-time">Cập nhật 2s/lần</span>
+              </div>
+            </div>
+            <div class="panel-body" style="padding: 16px 20px;">
+              <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 280px;">
+                  <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em;">Truyện đang cào hiện tại:</div>
+                  <h4 id="live-current-novel-title" style="font-size: 1.15rem; color: #fff; margin-bottom: 6px; font-weight: 700;">Đang chờ nhận việc từ hàng đợi...</h4>
+                  <div style="display: flex; gap: 12px; align-items: center; font-size: 0.88rem;">
+                    <span id="live-current-chapter" class="badge-pill" style="background: rgba(6, 182, 212, 0.2); color: #38bdf8; border: 1px solid rgba(6, 182, 212, 0.4);">Chương 0</span>
+                    <span id="live-current-source" style="color: var(--text-muted);"><i class="fa-solid fa-link"></i> --</span>
+                  </div>
+                </div>
+                <!-- Mini Log Console Stream -->
+                <div style="flex: 1.5; min-width: 320px; background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 10px 14px; font-family: monospace; font-size: 0.8rem; height: 90px; overflow-y: auto;" id="live-log-console">
+                  <div style="color: #64748b;">[System] Đang lắng nghe luồng sự kiện worker...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Queue Control Two-Columns -->
+          <div class="dashboard-row" style="margin-bottom: 24px;">
+            <!-- Column 1: Discovery Scanner (Producer) -->
+            <div class="panel">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <i class="fa-solid fa-compass text-cyan"></i>
+                  <h3>Bước 1: Quét Danh Mục Lấy Danh Sách Truyện</h3>
+                </div>
+                <span class="badge-status">Discovery</span>
+              </div>
+              <div class="panel-body">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
+                  Tự động quét các trang danh sách (Truyện Hot, Mới, Tiên Hiệp, v.v.), bóc tách tên, tác giả, ảnh bìa và gán trạng thái <code>pending</code>.
+                </p>
+                <form id="form-discover">
+                  <div class="form-group">
+                    <label for="discover-url"><i class="fa-solid fa-list"></i> URL Trang Danh Mục:</label>
+                    <input type="url" id="discover-url" required value="https://truyenfulldich.top/danh-sach?search_type=HOT_COMBO">
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group col-6">
+                      <label for="discover-pages"><i class="fa-solid fa-file"></i> Số trang quét (mỗi trang ~25 truyện):</label>
+                      <input type="number" id="discover-pages" min="1" max="20" value="2">
+                    </div>
+                    <div class="form-group col-6" style="display: flex; align-items: flex-end;">
+                      <button type="submit" class="btn btn-primary btn-block" id="btn-start-discover">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <span>Quét & Nạp Vào Queue</span>
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <!-- Column 2: Queue Worker Control (Consumer) -->
+            <div class="panel">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <i class="fa-solid fa-gears text-emerald"></i>
+                  <h3>Bước 2: Xử Lý Cào Tự Động (Queue Worker)</h3>
+                </div>
+                <span class="badge-tag green" id="worker-badge">IDLE</span>
+              </div>
+              <div class="panel-body">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
+                  Worker tự động lấy từng truyện có trạng thái <code>pending</code>, chuyển thành <code>crawling</code>, cào toàn bộ chương và lưu vào DB, sau đó cập nhật <code>completed</code>.
+                </p>
+                <div class="form-row" style="margin-bottom: 14px;">
+                  <div class="form-group col-6">
+                    <label for="worker-limit"><i class="fa-solid fa-hashtag"></i> Số chương / truyện (0 = cào hết):</label>
+                    <input type="number" id="worker-limit" min="1" max="5000" value="3">
+                  </div>
+                  <div class="form-group col-6">
+                    <label for="worker-delay"><i class="fa-solid fa-stopwatch"></i> Độ trễ an toàn (ms):</label>
+                    <input type="number" id="worker-delay" min="100" max="3000" value="350">
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                  <button class="btn btn-primary" id="btn-start-worker" style="flex: 1;">
+                    <i class="fa-solid fa-play"></i> Bắt Đầu Cào Hàng Đợi
+                  </button>
+                  <button class="btn btn-secondary" id="btn-stop-worker" style="flex: 1;">
+                    <i class="fa-solid fa-pause"></i> Tạm Dừng
+                  </button>
+                  <button class="btn btn-outline" id="btn-reset-failed" title="Cào lại các truyện bị lỗi">
+                    <i class="fa-solid fa-rotate-left"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Queue Table Explorer -->
+          <div class="table-container-card">
+            <div class="table-toolbar">
+              <div class="panel-title">
+                <i class="fa-solid fa-bars-staggered text-cyan"></i>
+                <h3 style="font-size: 1.05rem;">Danh Sách Truyện Trong Hàng Đợi (Crawl Queue)</h3>
+              </div>
+              <div class="filter-actions">
+                <select id="filter-queue-status" class="select-control">
+                  <option value="">Tất cả trạng thái</option>
+                  <option value="pending">Chờ cào (Pending)</option>
+                  <option value="crawling">Đang cào (Crawling)</option>
+                  <option value="completed">Đã xong (Completed)</option>
+                  <option value="failed">Thất bại (Failed)</option>
+                </select>
+                <button class="btn btn-secondary btn-icon" id="btn-reload-queue" title="Tải lại hàng đợi">
+                  <i class="fa-solid fa-rotate-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th style="width: 60px;">Bìa</th>
+                    <th>Tên Truyện</th>
+                    <th>Tác Giả</th>
+                    <th style="text-align: center;">Trạng Thái</th>
+                    <th style="text-align: center;">Chương Đã Cào</th>
+                    <th>Cập Nhật Lần Cuối</th>
+                    <th style="text-align: right;">Hành Động</th>
+                  </tr>
+                </thead>
+                <tbody id="queue-table-body">
+                  <tr>
+                    <td colspan="7" class="loading-row">
+                      <i class="fa-solid fa-circle-notch fa-spin"></i> Đang tải danh sách hàng đợi...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 3: NOVELS TABLE & DATA EXPLORER -->
+        <section class="tab-pane" id="pane-novels">
+          <div class="table-container-card">
+            <!-- Table Action Toolbar -->
+            <div class="table-toolbar">
+              <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="novel-search-input" placeholder="Tìm theo tên truyện hoặc tác giả...">
+              </div>
+              <div class="filter-actions">
+                <select id="filter-status" class="select-control">
+                  <option value="">Tất cả trạng thái</option>
+                  <option value="Full">Hoàn thành (Full)</option>
+                  <option value="Đang ra">Đang cập nhật</option>
+                </select>
+                <button class="btn btn-secondary btn-icon" id="btn-reload-novels" title="Tải lại">
+                  <i class="fa-solid fa-rotate-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Novels Data Table -->
+            <div class="table-responsive">
+              <table class="data-table" id="novels-table">
+                <thead>
+                  <tr>
+                    <th style="width: 70px;">Bìa</th>
+                    <th>Tên Truyện</th>
+                    <th>Tác Giả</th>
+                    <th>Thể Loại</th>
+                    <th style="text-align: center;">Chương Trong DB</th>
+                    <th style="text-align: center;">Trạng Thái</th>
+                    <th style="text-align: right; width: 180px;">Thao Tác</th>
+                  </tr>
+                </thead>
+                <tbody id="novels-table-body">
+                  <tr>
+                    <td colspan="7" class="loading-row">
+                      <i class="fa-solid fa-circle-notch fa-spin"></i> Đang tải dữ liệu từ database...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="table-footer">
+              <span class="table-info" id="table-entries-info">Hiển thị 0 bộ truyện</span>
+              <div class="pagination" id="novels-pagination">
+                <!-- Dynamically rendered -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 4: WEB SOURCES & SCHEDULER MANAGEMENT -->
+        <section class="tab-pane" id="pane-sources">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <i class="fa-solid fa-globe text-cyan"></i>
+                <h3>Danh Sách Trang Web Nguồn & Lập Lịch Quét Hàng Ngày</h3>
+              </div>
+              <button class="btn btn-secondary btn-sm" id="btn-refresh-sources">
+                <i class="fa-solid fa-arrows-rotate"></i> Làm mới nguồn
+              </button>
+            </div>
+            <div class="panel-body">
+              <div class="queue-status-banner" style="margin-bottom: 20px;">
+                <div class="banner-left">
+                  <div class="worker-pulse"></div>
+                  <div>
+                    <strong>Tiến Trình Quét Tự Động Định Kỳ (Daily Scheduler): Hoạt động (Active)</strong>
+                    <span>Bộ lập lịch tự động rà soát các nguồn web đang bật mỗi 12 giờ để tìm truyện mới và nạp vào hàng đợi cào ngầm.</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Tên Trang Web</th>
+                      <th>Tên Miền (Domain)</th>
+                      <th>URL Danh Mục Quét</th>
+                      <th style="text-align: center;">Tần Suất Quét</th>
+                      <th>Lần Quét Gần Nhất</th>
+                      <th style="text-align: center;">Trạng Thái</th>
+                      <th style="text-align: right;">Hành Động</th>
+                    </tr>
+                  </thead>
+                  <tbody id="sources-table-body">
+                    <tr>
+                      <td colspan="7" class="loading-row">
+                        <i class="fa-solid fa-circle-notch fa-spin"></i> Đang tải danh sách nguồn từ PostgreSQL...
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 5: SHOPEE AFFILIATE MANAGEMENT -->
+        <section class="tab-pane" id="pane-affiliate">
+          <!-- Affiliate Metrics -->
+          <div class="metrics-grid" style="margin-bottom: 24px;">
+            <div class="metric-card emerald">
+              <div class="metric-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+              <div class="metric-info">
+                <span class="metric-label">Tổng Liên Kết Shopee</span>
+                <h3 class="metric-value" id="affiliate-count-total">0</h3>
+                <span class="metric-hint">Đã lưu trong database</span>
+              </div>
+            </div>
+
+            <div class="metric-card cyan">
+              <div class="metric-icon"><i class="fa-solid fa-eye"></i></div>
+              <div class="metric-info">
+                <span class="metric-label">Đang Hiển Thị (Active)</span>
+                <h3 class="metric-value" id="affiliate-count-active">0</h3>
+                <span class="metric-hint">Được hiển thị trên Client UI</span>
+              </div>
+            </div>
+
+            <div class="metric-card amber">
+              <div class="metric-icon"><i class="fa-solid fa-arrow-pointer"></i></div>
+              <div class="metric-info">
+                <span class="metric-label">Tổng Lượt Click</span>
+                <h3 class="metric-value" id="affiliate-count-clicks">0</h3>
+                <span class="metric-hint">Lượng chuyển đổi độc giả</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div class="table-container-card">
+            <div class="table-toolbar">
+              <div class="panel-title">
+                <i class="fa-solid fa-tags text-cyan"></i>
+                <h3 style="font-size: 1.05rem;">Quản Lý Danh Sách Link Shopee Affiliate</h3>
+              </div>
+              <div class="filter-actions">
+                <button class="btn btn-primary" id="btn-open-add-affiliate">
+                  <i class="fa-solid fa-plus"></i>
+                  <span>Thêm Link Shopee Mới</span>
+                </button>
+                <button class="btn btn-secondary btn-icon" id="btn-reload-affiliates" title="Tải lại danh sách">
+                  <i class="fa-solid fa-rotate-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th style="width: 70px;">Ảnh SP</th>
+                    <th>Tên Sản Phẩm / Deal</th>
+                    <th>Link Shopee Affiliate</th>
+                    <th>Giá / Ưu đãi</th>
+                    <th>Vị Trí</th>
+                    <th style="text-align: center;">Lượt Click</th>
+                    <th style="text-align: center;">Trạng Thái</th>
+                    <th style="text-align: right;">Hành Động</th>
+                  </tr>
+                </thead>
+                <tbody id="affiliate-table-body">
+                  <tr>
+                    <td colspan="8" class="loading-row">
+                      <i class="fa-solid fa-circle-notch fa-spin"></i> Đang tải dữ liệu Shopee Affiliate...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 6: DATABASE SCHEMAS & DETAILS -->
+        <section class="tab-pane" id="pane-database">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <i class="fa-solid fa-network-wired text-cyan"></i>
+                <h3>Cấu Trúc Các Bảng Trong <code>comics_db</code></h3>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="schema-cards-grid">
+                <div class="schema-card">
+                  <h4><i class="fa-solid fa-list-check"></i> crawl_queue</h4>
+                  <p>Hàng đợi cào 2 giai đoạn: lưu danh sách tên truyện và trạng thái (pending, crawling, completed, failed).</p>
+                  <span class="badge-tag amber">Queue Pattern</span>
+                </div>
+                <div class="schema-card">
+                  <h4><i class="fa-solid fa-book"></i> novels</h4>
+                  <p>Bảng chính chứa thông tin bộ truyện, slug, rating, tác giả, trạng thái, ảnh bìa.</p>
+                  <span class="badge-tag cyan">Partition ready</span>
+                </div>
+                <div class="schema-card">
+                  <h4><i class="fa-solid fa-list-ol"></i> chapters</h4>
+                  <p>Mục lục chương siêu nhẹ (chỉ chứa metadata số chương, slug, word count, view).</p>
+                  <span class="badge-tag violet">High-speed Index</span>
+                </div>
+                <div class="schema-card">
+                  <h4><i class="fa-solid fa-file-lines"></i> chapter_contents</h4>
+                  <p>Tách bảng riêng chứa toàn bộ văn bản chữ. Nén LZ4 TOAST tự động tiết kiệm 70% đĩa.</p>
+                  <span class="badge-tag green">LZ4 Compressed</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL: CHAPTERS & CONTENT VIEWER -->
+  <div class="modal-backdrop" id="novel-detail-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <h2 id="modal-novel-title">Chi Tiết Bộ Truyện</h2>
+          <span class="modal-sub" id="modal-novel-meta">Tác giả: ... | Thể loại: ...</span>
+        </div>
+        <button class="modal-close" id="btn-close-modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="novel-detail-layout">
+          <!-- Left: Novel info sidebar -->
+          <div class="novel-info-card">
+            <div class="cover-wrapper">
+              <img id="modal-novel-cover" src="" alt="Cover">
+            </div>
+            <div class="novel-meta-list">
+              <div class="meta-item">
+                <span class="meta-label">Trạng thái:</span>
+                <span class="meta-val" id="modal-novel-status">--</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Tổng chương:</span>
+                <span class="meta-val highlight" id="modal-novel-chapters-count">0</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Nguồn:</span>
+                <a href="#" target="_blank" id="modal-novel-source" class="meta-link">Xem trang gốc</a>
+              </div>
+            </div>
+            <div class="novel-desc-box">
+              <h4>Giới thiệu ngắn:</h4>
+              <p id="modal-novel-desc">Đang tải...</p>
+            </div>
+          </div>
+
+          <!-- Right: Chapters List -->
+          <div class="chapters-explorer">
+            <div class="explorer-header">
+              <h3><i class="fa-solid fa-list-check text-cyan"></i> Danh Sách Chương Trong Database</h3>
+              <span class="badge-pill" id="modal-actual-chapters-badge">0 chương</span>
+            </div>
+            
+            <div class="chapters-list-wrapper" id="modal-chapters-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DRAWER: CHAPTER CONTENT READER -->
+  <div class="modal-backdrop" id="reader-modal">
+    <div class="modal-dialog reader-dialog">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <h2 id="reader-chapter-title">Chương...</h2>
+          <span class="modal-sub" id="reader-chapter-meta">0 từ vựng | Trích xuất từ bảng chapter_contents</span>
+        </div>
+        <button class="modal-close" id="btn-close-reader">&times;</button>
+      </div>
+      <div class="modal-body reader-body">
+        <div class="reader-content-box" id="reader-content-text">
+          <!-- Chapter content loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT SHOPEE AFFILIATE -->
+  <div class="modal-backdrop" id="affiliate-modal">
+    <div class="modal-dialog" style="max-width: 580px;">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <h2 id="modal-affiliate-title">Thêm Link Shopee Affiliate</h2>
+          <span class="modal-sub">Lưu vào DB và đồng bộ hiển thị thanh chạy dài & các vị trí trên site Client</span>
+        </div>
+        <button class="modal-close" id="btn-close-affiliate-modal">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 24px;">
+        <form id="form-affiliate">
+          <input type="hidden" id="affiliate-id">
+          
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label for="affiliate-title-input"><i class="fa-solid fa-heading"></i> Tiêu đề sản phẩm / Tên ưu đãi: *</label>
+            <input type="text" id="affiliate-title-input" required placeholder="Ví dụ: Bàn Phím Cơ Tu Tiên Led RGB Switch Êm Ái">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label for="affiliate-url-input"><i class="fa-solid fa-link"></i> Link Shopee Affiliate: *</label>
+            <input type="url" id="affiliate-url-input" required placeholder="https://shopee.vn/... hoặc https://s.shopee.vn/...">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label for="affiliate-image-input"><i class="fa-solid fa-image"></i> Link ảnh sản phẩm (tuỳ chọn):</label>
+            <input type="url" id="affiliate-image-input" placeholder="https://cf.shopee.vn/file/...">
+          </div>
+
+          <div class="form-row" style="margin-bottom: 14px;">
+            <div class="form-group col-6">
+              <label for="affiliate-discount-input"><i class="fa-solid fa-tag"></i> Giá khuyến mãi:</label>
+              <input type="text" id="affiliate-discount-input" placeholder="199.000đ">
+            </div>
+            <div class="form-group col-6">
+              <label for="affiliate-original-input"><i class="fa-solid fa-money-bill"></i> Giá gốc:</label>
+              <input type="text" id="affiliate-original-input" placeholder="299.000đ">
+            </div>
+          </div>
+
+          <div class="form-row" style="margin-bottom: 18px;">
+            <div class="form-group col-6">
+              <label for="affiliate-tag-input"><i class="fa-solid fa-fire"></i> Nhãn nổi bật:</label>
+              <input type="text" id="affiliate-tag-input" placeholder="Flash Sale / Tu Tiên Đồ">
+            </div>
+            <div class="form-group col-6">
+              <label for="affiliate-position-select"><i class="fa-solid fa-arrows-to-dot"></i> Vị trí hiển thị:</label>
+              <select id="affiliate-position-select" class="select-control">
+                <option value="ticker">Thanh chạy Ticker (Trang chủ)</option>
+                <option value="reader_footer">Chân trang Đọc Truyện</option>
+                <option value="sidebar">Thanh bên (Sidebar)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" id="btn-cancel-affiliate">Hủy</button>
+            <button type="submit" class="btn btn-primary" id="btn-save-affiliate">
+              <i class="fa-solid fa-floppy-disk"></i> Lưu Link Affiliate
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script src="js/admin.js"></script>
+</body>
+</html>

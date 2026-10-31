@@ -1,0 +1,15 @@
+# Binaries and executables
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Temp and logs
+tmp/
+*.log
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db

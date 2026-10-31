@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bản Thiết Kế Web Truyện Tu Tiên - UI Concept</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cinzel:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #080B10;
+      --card-bg: #111622;
+      --card-border: rgba(6, 182, 212, 0.2);
+      --cyan-spirit: #06B6D4;
+      --gold-dao: #F59E0B;
+      --text-main: #F3F4F6;
+      --text-muted: #94A3B8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    header {
+      background: linear-gradient(180deg, rgba(6, 182, 212, 0.15) 0%, rgba(8, 11, 16, 0.95) 100%);
+      border-bottom: 1px solid var(--card-border);
+      padding: 40px 24px 24px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+    }
+
+    .badge-top {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 999px;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: var(--gold-dao);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      text-shadow: 0 0 25px rgba(6, 182, 212, 0.5);
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 700px;
+      margin: 0 auto 20px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      padding: 10px 22px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab-btn:hover {
+      border-color: var(--cyan-spirit);
+      color: #FFF;
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.25), rgba(245, 158, 11, 0.2));
+      border-color: var(--cyan-spirit);
+      color: #FFF;
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.35);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1400px;
+      margin: 32px auto 0;
+      padding: 0 20px;
+    }
+
+    .design-card {
+      display: none;
+      animation: fadeIn 0.35s ease;
+    }
+
+    .design-card.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-header {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px 16px 0 0;
+      padding: 20px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .card-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #FFF;
+    }
+
+    .card-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-top: 4px;
+    }
+
+    .action-links a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid var(--gold-dao);
+      color: var(--gold-dao);
+      padding: 8px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .action-links a:hover {
+      background: var(--gold-dao);
+      color: #000;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
+    }
+
+    .image-wrapper {
+      background: #000;
+      border-left: 1px solid var(--card-border);
+      border-right: 1px solid var(--card-border);
+      text-align: center;
+      padding: 16px;
+      cursor: zoom-in;
+    }
+
+    .image-wrapper img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: transform 0.3s ease;
+    }
+
+    .card-footer {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-top: none;
+      border-radius: 0 0 16px 16px;
+      padding: 24px 28px;
+    }
+
+    .highlights-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--cyan-spirit);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .highlights-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .highlight-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      padding: 14px 18px;
+    }
+
+    .highlight-item strong {
+      display: block;
+      color: #FFF;
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+    }
+
+    .highlight-item p {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+
+    .footer-feedback {
+      margin-top: 50px;
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(245, 158, 11, 0.08));
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      border-radius: 16px;
+      padding: 28px;
+      text-align: center;
+    }
+
+    .footer-feedback h3 {
+      color: #FFF;
+      font-size: 1.3rem;
+      margin-bottom: 8px;
+    }
+
+    .footer-feedback p {
+      color: var(--text-muted);
+      max-width: 650px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge-top">✦ THIẾT KẾ ĐỘC BẢN ✦</div>
+    <h1>WEB TRUYỆN TU TIÊN & AFFILIATE</h1>
+    <p class="subtitle">Bản thiết kế mẫu giao diện Huyền Huyễn / Tiên Hiệp tối ưu trải nghiệm đọc và vị trí tiếp thị Shopee chuyển đổi cao.</p>
+    
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab(0)">
+        <span>🏛️</span> 01. Trang Chủ (Homepage)
+      </button>
+      <button class="tab-btn" onclick="switchTab(1)">
+        <span>📜</span> 02. Chi Tiết Truyện (Novel Detail)
+      </button>
+      <button class="tab-btn" onclick="switchTab(2)">
+        <span>📖</span> 03. Trình Đọc Chương (Reader UI)
+      </button>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- TAB 1: TRANG CHỦ -->
+    <div class="design-card active" id="tab-0">
+      <div class="card-header">
+        <div>
+          <div class="card-title">01. Trang Chủ (Homepage)</div>
+          <div class="card-desc">Giao diện tiếp đón độc giả, hiển thị truyện nổi bật, bảng xếp hạng cảnh giới và banner Tàng Bảo Các.</div>
+        </div>
+        <div class="action-links">
+          <a href="01_trang_chu_homepage.jpg" target="_blank">🔍 Mở ảnh gốc (Full HD)</a>
+        </div>
+      </div>
+      <div class="image-wrapper" onclick="window.open('01_trang_chu_homepage.jpg')">
+        <img src="01_trang_chu_homepage.jpg" alt="Trang Chủ Web Truyện Tu Tiên">
+      </div>
+      <div class="card-footer">
+        <div class="highlights-title">⚡ ĐIỂM NHẤN THIẾT KẾ</div>
+        <div class="highlights-grid">
+          <div class="highlight-item">
+            <strong>Hero Banner Đỉnh Phong</strong>
+            <p>Trượt slide các bộ truyện hot với hào quang thanh kiếm phát sáng và núi non thần bí, kích thích người đọc bấm "Đọc Ngay".</p>
+          </div>
+          <div class="highlight-item">
+            <strong>Huy Hiệu Cảnh Giới</strong>
+            <p>Gắn mác Luyện Khí, Trúc Cơ, Kim Đan... thay cho thể loại thường, tạo chất tu tiên khác biệt hoàn toàn với web truyện lậu thông thường.</p>
+          </div>
+          <div class="highlight-item">
+            <strong>Banner Shopee "Tàng Bảo Các"</strong>
+            <p>Nằm cuối trang nhưng bắt mắt như một kho bảo vật. Kêu gọi mở rương săn ưu đãi $\rightarrow$ điều hướng về Shopee.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: CHI TIẾT TRUYỆN -->
+    <div class="design-card" id="tab-1">
+      <div class="card-header">
+        <div>
+          <div class="card-title">02. Trang Chi Tiết & Mục Lục Chương</div>
+          <div class="card-desc">Hiển thị bìa truyện huyền ảo, giới thiệu tóm tắt, mục lục hàng ngàn chương và sidebar Linh Bảo Quán.</div>
+        </div>
+        <div class="action-links">
+          <a href="02_chi_tiet_truyen_detail.jpg" target="_blank">🔍 Mở ảnh gốc (Full HD)</a>
+        </div>
+      </div>
+      <div class="image-wrapper" onclick="window.open('02_chi_tiet_truyen_detail.jpg')">
+        <img src="02_chi_tiet_truyen_detail.jpg" alt="Trang Chi Tiết Truyện">
+      </div>
+      <div class="card-footer">
+        <div class="highlights-title">⚡ ĐIỂM NHẤN THIẾT KẾ</div>
+        <div class="highlights-grid">
+          <div class="highlight-item">
+            <strong>Khung Bìa Phát Hào Quang</strong>
+            <p>Hình ảnh luyện đan / kiếm hiệp sắc nét kèm thông số 1.2M lượt xem, 1,450 chương, nút bấm "Đọc Từ Đầu" mạ vàng bắt mắt.</p>
+          </div>
+          <div class="highlight-item">
+            <strong>Mục Lục Gắn Icon Cảnh Giới</strong>
+            <p>Mỗi chương có icon cảnh giới tương ứng (Luyện Khí $\rightarrow$ Kim Đan $\rightarrow$ Nguyên Anh), giúp người đọc theo dõi lộ trình nhân vật.</p>
+          </div>
+          <div class="highlight-item">
+            <strong>Sidebar Shopee "Linh Bảo Quán"</strong>
+            <p>Cố định bên phải khi cuộn danh sách chương: gợi ý Thác nước phong thủy, Ấm trà tử sa, Bàn phím cơ... đúng sở thích độc giả nam/tu tiên.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: TRÌNH ĐỌC TRUYỆN -->
+    <div class="design-card" id="tab-2">
+      <div class="card-header">
+        <div>
+          <div class="card-title">03. Trình Đọc Chương (Reader UI - Đa Nền Tảng)</div>
+          <div class="card-desc">Tối ưu cho cả PC, Tablet và Mobile; thanh công cụ đọc nổi và box sản phẩm Shopee chèn tự nhiên trong chương.</div>
+        </div>
+        <div class="action-links">
+          <a href="03_trinh_doc_truyen_reader.jpg" target="_blank">🔍 Mở ảnh gốc (Full HD)</a>
+        </div>
+      </div>
+      <div class="image-wrapper" onclick="window.open('03_trinh_doc_truyen_reader.jpg')">
+        <img src="03_trinh_doc_truyen_reader.jpg" alt="Trình Đọc Truyện Đa Thiết Bị">
+      </div>
+      <div class="card-footer">
+        <div class="highlights-title">⚡ ĐIỂM NHẤN THIẾT KẾ</div>
+        <div class="highlights-grid">
+          <div class="highlight-item">
+            <strong>Thanh Điều Hướng Nổi (Floating Bar)</strong>
+            <p>Chuyển chương mượt mà, đổi cỡ chữ nhanh (A- A+) và chế độ đọc nền tối/vàng giấy giúp không bị mỏi mắt khi cày truyện xuyên đêm.</p>
+          </div>
+          <div class="highlight-item">
+            <strong>In-Text Box "Phúc Địa Tu Tiên"</strong>
+            <p>Hộp sản phẩm Shopee nằm ở cuối chương hoặc ngắt quãng giữa chương: Trà thảo mộc, Phù bình an... Tỷ lệ click cực cao khi người đọc vừa đọc xong một phân đoạn gay cấn.</p>
+          </div>
+          <div class="highlight-item">
+            <strong>Tương Thích Mobile 100%</strong>
+            <p>Hơn 85% độc giả đọc truyện trên điện thoại. Giao diện mobile được căn lề chuẩn ngón tay bấm, không bị che khuất nội dung.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GÓP Ý & FEEDBACK -->
+    <div class="footer-feedback">
+      <h3>💬 Hãy Cho Tôi Biết Ý Kiến Của Bạn!</h3>
+      <p>Bạn thấy tông màu, bố cục, hay các vị trí đặt Shopee ở trên đã ưng ý chưa? Bạn muốn điều chỉnh thêm chi tiết nào (màu sắc, phông chữ, vị trí nút bấm...)?</p>
+    </div>
+
+  </div>
+
+  <script>
+    function switchTab(index) {
+      const tabs = document.querySelectorAll('.tab-btn');
+      const cards = document.querySelectorAll('.design-card');
+      
+      tabs.forEach((tab, i) => {
+        if (i === index) {
+          tab.classList.add('active');
+          cards[i].classList.add('active');
+        } else {
+          tab.classList.remove('active');
+          cards[i].classList.remove('active');
+        }
+      });
+    }
+  </script>
+</body>
+</html>
