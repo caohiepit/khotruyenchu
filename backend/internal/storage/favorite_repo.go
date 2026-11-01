@@ -180,3 +180,4 @@ func (r *FavoriteRepository) IsFavorited(userID, novelSlug string) bool {
 	}
 	return false
 }
+

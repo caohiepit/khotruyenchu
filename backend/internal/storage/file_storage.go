@@ -229,7 +229,7 @@ func (fs *FileStorage) LoadAllNovelsFromDisk() []domain.Novel {
 				rating = 9.5
 			}
 
-			result = append(result, domain.Novel{
+			n := domain.Novel{
 				ID:             slug,
 				Title:          raw.Title,
 				Slug:           slug,
@@ -244,7 +244,9 @@ func (fs *FileStorage) LoadAllNovelsFromDisk() []domain.Novel {
 				RatingScore:    rating,
 				Realm:          raw.Realm,
 				SourceURL:      raw.SourceURL,
-			})
+			}
+			cleaner.CleanNovel(&n)
+			result = append(result, n)
 		}
 	}
 
@@ -331,6 +333,7 @@ func (fs *FileStorage) LoadChapterContentFromDisk(chapterID string) (*domain.Cha
 				chap.ContentText = string(txtBytes)
 			}
 		}
+		cleaner.CleanChapter(&chap)
 		return &chap, nil
 	}
 	return nil, fmt.Errorf("chapter %s not found on disk", chapterID)

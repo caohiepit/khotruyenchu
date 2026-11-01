@@ -11,3 +11,4 @@ type Favorite struct {
 	NovelCover string    `json:"novel_cover"`
 	CreatedAt  time.Time `json:"created_at"`
 }
+

@@ -39,6 +39,8 @@ def clean_text_data(raw_text):
     text = text.replace('<p>', '').replace('</p>', '\n')
     text = re.sub(r'(?i)<[^>]*>', '', text)
     text = html.unescape(text)
+    if '&' in text:
+        text = html.unescape(text)
 
     watermarks = [
         r'(?i)truyenfull\.vn|truyenfull\.live|truyenfulldich\.top|truyenfull\.com|tangthuvien\.net',

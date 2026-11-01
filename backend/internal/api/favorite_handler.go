@@ -100,3 +100,4 @@ func (s *Server) handleCheckFavorite(w http.ResponseWriter, r *http.Request) {
 	isFav := s.favoriteRepo.IsFavorited(userID, slug)
 	jsonResponse(w, http.StatusOK, map[string]bool{"favorited": isFav})
 }
+

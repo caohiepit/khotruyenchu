@@ -11,6 +11,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 
+	"comics-backend/internal/crawler/cleaner"
 	"comics-backend/internal/crawler/fetcher"
 	"comics-backend/internal/domain"
 )
@@ -398,11 +399,6 @@ func (h *TruyenFullDichHandler) ParseChapter(chapterURL string, defaultChapterNu
 	return chapter, nextChapterURL, nil
 }
 
-var tagRegex = regexp.MustCompile(`<[^>]*>`)
-var spaceRegex = regexp.MustCompile(`[ \t]+`)
-
 func stripSimpleHTML(s string) string {
-	s = tagRegex.ReplaceAllString(s, " ")
-	s = spaceRegex.ReplaceAllString(s, " ")
-	return strings.TrimSpace(s)
+	return cleaner.CleanText(s)
 }

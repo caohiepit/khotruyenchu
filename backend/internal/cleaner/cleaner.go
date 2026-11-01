@@ -149,6 +149,9 @@ func CleanDescription(desc string) string {
 	// 2. Strip remaining HTML tags & decode entities
 	text = reHTMLTags.ReplaceAllString(text, "")
 	text = html.UnescapeString(text)
+	if strings.Contains(text, "&") {
+		text = html.UnescapeString(text)
+	}
 
 	// 3. Filter lines line by line to remove watermarks and promo texts
 	lines := strings.Split(text, "\n")
@@ -217,6 +220,9 @@ func CleanChapterContent(content string) string {
 	// 3. Strip all HTML tags & unescape entities
 	text = reHTMLTags.ReplaceAllString(text, "")
 	text = html.UnescapeString(text)
+	if strings.Contains(text, "&") {
+		text = html.UnescapeString(text)
+	}
 
 	// 4. Line by line watermark filtering
 	lines := strings.Split(text, "\n")
