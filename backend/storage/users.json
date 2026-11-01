@@ -1,8 +1,21 @@
 [
   {
+    "id": "usr-admin",
+    "username": "admin",
+    "email": "admin@truyenchu.vn",
+    "password_hash": "9256c04064e5c6d59b1351cb6554b93005252ae170ac6de6bccb571daa1986af",
+    "role": "admin",
+    "realm": "Độ Kiếp Kỳ",
+    "exp": 99999,
+    "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=AdminTruyenChu",
+    "created_at": "2026-11-01T20:37:25.9927126+07:00",
+    "updated_at": "2026-11-01T20:37:25.9927126+07:00"
+  },
+  {
     "id": "usr-1",
     "username": "TieuViem",
     "email": "tieuviem@tu-tien.vn",
+    "role": "user",
     "realm": "Kim Đan Kỳ",
     "exp": 2800,
     "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=TieuViem",
@@ -13,6 +26,7 @@
     "id": "usr-371800",
     "username": "DaoHuuThang",
     "email": "thang@tu-tien.vn",
+    "role": "user",
     "realm": "Phàm Nhân",
     "exp": 35,
     "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=DaoHuuThang",

@@ -121,21 +121,196 @@ const elements = {
   btnModalDeleteFeedback: document.getElementById('btn-modal-delete-feedback'),
   modalFeedbackMeta: document.getElementById('modal-feedback-meta'),
   modalFeedbackTypeBadge: document.getElementById('modal-feedback-type-badge'),
-  modalFeedbackContent: document.getElementById('modal-feedback-content')
+  modalFeedbackContent: document.getElementById('modal-feedback-content'),
+
+  // Admin Auth Elements
+  adminLoginOverlay: document.getElementById('admin-login-overlay'),
+  adminLoginForm: document.getElementById('admin-login-form'),
+  adminLoginUsername: document.getElementById('admin-login-username'),
+  adminLoginPassword: document.getElementById('admin-login-password'),
+  adminLoginError: document.getElementById('admin-login-error'),
+  btnToggleAdminPwd: document.getElementById('btn-toggle-admin-pwd'),
+  btnAdminSubmitLogin: document.getElementById('btn-admin-submit-login'),
+  btnAdminLogout: document.getElementById('btn-admin-logout'),
+  topbarAdminUsername: document.getElementById('topbar-admin-username')
 };
 
+// Admin Auth Management
+function getAdminToken() {
+  return localStorage.getItem('comics_admin_session') || '';
+}
+
+function getAdminUser() {
+  try {
+    return JSON.parse(localStorage.getItem('comics_admin_user') || 'null');
+  } catch (e) {
+    return null;
+  }
+}
+
+function showLoginOverlay() {
+  if (elements.adminLoginOverlay) {
+    elements.adminLoginOverlay.classList.remove('hidden');
+    if (elements.adminLoginPassword) elements.adminLoginPassword.value = '';
+    if (elements.adminLoginError) elements.adminLoginError.style.display = 'none';
+    setTimeout(() => {
+      elements.adminLoginUsername?.focus();
+    }, 100);
+  }
+}
+
+function hideLoginOverlay() {
+  if (elements.adminLoginOverlay) {
+    elements.adminLoginOverlay.classList.add('hidden');
+  }
+}
+
+async function verifyAdminSession() {
+  const token = getAdminToken();
+  if (!token) {
+    showLoginOverlay();
+    return false;
+  }
+
+  // Pre-fill topbar from cached admin user for instant UI rendering
+  const cachedUser = getAdminUser();
+  if (cachedUser && cachedUser.username && elements.topbarAdminUsername) {
+    elements.topbarAdminUsername.textContent = cachedUser.username;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/admin/auth/verify`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!res.ok) {
+      throw new Error('Phiên đăng nhập đã hết hạn.');
+    }
+
+    const data = await res.json();
+    if (data.valid && data.admin) {
+      if (elements.topbarAdminUsername) {
+        elements.topbarAdminUsername.textContent = data.admin.username || 'Admin';
+      }
+      hideLoginOverlay();
+      return true;
+    } else {
+      throw new Error('Dữ liệu xác thực không hợp lệ.');
+    }
+  } catch (err) {
+    console.warn('Admin session invalid:', err.message);
+    localStorage.removeItem('comics_admin_session');
+    localStorage.removeItem('comics_admin_user');
+    showLoginOverlay();
+    return false;
+  }
+}
+
+async function handleAdminLoginSubmit(e) {
+  e.preventDefault();
+  const username = elements.adminLoginUsername.value.trim();
+  const password = elements.adminLoginPassword.value;
+
+  if (!username || !password) {
+    if (elements.adminLoginError) {
+      elements.adminLoginError.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> <span>Vui lòng nhập đầy đủ tài khoản và mật khẩu.</span>';
+      elements.adminLoginError.style.display = 'flex';
+    }
+    return;
+  }
+
+  const submitBtn = elements.btnAdminSubmitLogin;
+  const originalHtml = submitBtn ? submitBtn.innerHTML : '';
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xác thực...';
+  }
+  if (elements.adminLoginError) {
+    elements.adminLoginError.style.display = 'none';
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/admin/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Tài khoản hoặc mật khẩu không chính xác.');
+    }
+
+    localStorage.setItem('comics_admin_session', data.token);
+    if (data.admin) {
+      localStorage.setItem('comics_admin_user', JSON.stringify(data.admin));
+      if (elements.topbarAdminUsername) {
+        elements.topbarAdminUsername.textContent = data.admin.username;
+      }
+    }
+
+    hideLoginOverlay();
+    loadAllData();
+  } catch (err) {
+    if (elements.adminLoginError) {
+      elements.adminLoginError.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <span>${err.message}</span>`;
+      elements.adminLoginError.style.display = 'flex';
+    }
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalHtml;
+    }
+  }
+}
+
+function handleAdminLogout() {
+  if (!confirm('Bạn có chắc chắn muốn đăng xuất khỏi trang Quản trị viên?')) {
+    return;
+  }
+  localStorage.removeItem('comics_admin_session');
+  localStorage.removeItem('comics_admin_user');
+  showLoginOverlay();
+}
+
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   if (elements.apiEndpointText) {
     elements.apiEndpointText.textContent = API_BASE;
   }
+
+  // Admin Auth Event Listeners
+  if (elements.adminLoginForm) {
+    elements.adminLoginForm.addEventListener('submit', handleAdminLoginSubmit);
+  }
+  if (elements.btnAdminLogout) {
+    elements.btnAdminLogout.addEventListener('click', handleAdminLogout);
+  }
+  if (elements.btnToggleAdminPwd) {
+    elements.btnToggleAdminPwd.addEventListener('click', () => {
+      const isPwd = elements.adminLoginPassword.type === 'password';
+      elements.adminLoginPassword.type = isPwd ? 'text' : 'password';
+      elements.btnToggleAdminPwd.innerHTML = isPwd
+        ? '<i class="fa-regular fa-eye-slash"></i>'
+        : '<i class="fa-regular fa-eye"></i>';
+    });
+  }
+
   initTabs();
   initEventListeners();
-  loadAllData();
+
+  // Enforce Admin Authentication before loading dashboard data
+  const isAuthenticated = await verifyAdminSession();
+  if (isAuthenticated) {
+    loadAllData();
+  }
 
   // Auto-refresh stats and queue status every 2 seconds (disabled in headless automated tests)
   if (!navigator.webdriver) {
     setInterval(() => {
+      if (!getAdminToken()) return;
       loadStats();
       if (appState.activeTab === 'queue') {
         loadQueue();

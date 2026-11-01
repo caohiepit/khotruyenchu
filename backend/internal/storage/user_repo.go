@@ -52,11 +52,13 @@ func hashPassword(pwd string) string {
 func (r *UserRepository) seedDefaultUser() {
 	r.memMu.Lock()
 	defer r.memMu.Unlock()
+	r.ensureAdminLocked()
 	defaultUser := domain.User{
 		ID:        "usr-1",
 		Username:  "TieuViem",
 		Email:     "tieuviem@tu-tien.vn",
 		Password:  hashPassword("123456"),
+		Role:      "user",
 		Realm:     "Kim Đan Kỳ",
 		Exp:       2800,
 		AvatarURL: "https://api.dicebear.com/7.x/bottts/svg?seed=TieuViem",
@@ -65,6 +67,46 @@ func (r *UserRepository) seedDefaultUser() {
 	}
 	r.memUsers = append(r.memUsers, defaultUser)
 	r.saveToJSONLocked()
+}
+
+func (r *UserRepository) ensureAdminLocked() {
+	hasAdmin := false
+	for i, u := range r.memUsers {
+		if strings.EqualFold(u.Username, "admin") {
+			r.memUsers[i].Role = "admin"
+			if r.memUsers[i].Password == "" {
+				r.memUsers[i].Password = hashPassword("admin123")
+			}
+			hasAdmin = true
+			break
+		}
+		if u.Role == "" {
+			r.memUsers[i].Role = "user"
+		}
+	}
+
+	if !hasAdmin {
+		adminUser := domain.User{
+			ID:        "usr-admin",
+			Username:  "admin",
+			Email:     "admin@truyenchu.vn",
+			Password:  hashPassword("admin123"),
+			Role:      "admin",
+			Realm:     "Độ Kiếp Kỳ",
+			Exp:       99999,
+			AvatarURL: "https://api.dicebear.com/7.x/bottts/svg?seed=AdminTruyenChu",
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}
+		r.memUsers = append([]domain.User{adminUser}, r.memUsers...)
+		if r.dbAvailable() {
+			_, _ = r.db.Exec(`
+				INSERT INTO users (id, username, email, password_hash, role, realm, exp, avatar_url, created_at, updated_at)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+				ON CONFLICT (username) DO UPDATE SET password_hash = EXCLUDED.password_hash, role = 'admin'
+			`, adminUser.ID, adminUser.Username, adminUser.Email, adminUser.Password, adminUser.Role, adminUser.Realm, adminUser.Exp, adminUser.AvatarURL, adminUser.CreatedAt, adminUser.UpdatedAt)
+		}
+	}
 }
 
 func (r *UserRepository) loadFromJSON() {
@@ -76,6 +118,10 @@ func (r *UserRepository) loadFromJSON() {
 	if err := json.Unmarshal(data, &users); err == nil {
 		r.memUsers = users
 	}
+	r.memMu.Lock()
+	r.ensureAdminLocked()
+	r.saveToJSONLocked()
+	r.memMu.Unlock()
 }
 
 func (r *UserRepository) saveToJSONLocked() {
@@ -111,6 +157,7 @@ func (r *UserRepository) Register(username, email, password string) (*domain.Use
 		Username:  username,
 		Email:     email,
 		Password:  hashPassword(password),
+		Role:      "user",
 		Realm:     "Phàm Nhân",
 		Exp:       10,
 		AvatarURL: fmt.Sprintf("https://api.dicebear.com/7.x/bottts/svg?seed=%s", username),
@@ -120,9 +167,9 @@ func (r *UserRepository) Register(username, email, password string) (*domain.Use
 
 	if r.dbAvailable() {
 		_, _ = r.db.Exec(`
-			INSERT INTO users (id, username, email, password_hash, realm, exp, avatar_url, created_at, updated_at)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-		`, newUser.ID, newUser.Username, newUser.Email, newUser.Password, newUser.Realm, newUser.Exp, newUser.AvatarURL, newUser.CreatedAt, newUser.UpdatedAt)
+			INSERT INTO users (id, username, email, password_hash, role, realm, exp, avatar_url, created_at, updated_at)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		`, newUser.ID, newUser.Username, newUser.Email, newUser.Password, newUser.Role, newUser.Realm, newUser.Exp, newUser.AvatarURL, newUser.CreatedAt, newUser.UpdatedAt)
 	}
 
 	r.memUsers = append(r.memUsers, newUser)
@@ -146,6 +193,18 @@ func (r *UserRepository) Authenticate(login, password string) (*domain.User, err
 		}
 	}
 	return nil, errors.New("đạo hiệu hoặc mật khẩu không chính xác")
+}
+
+// AuthenticateAdmin verifies admin credentials
+func (r *UserRepository) AuthenticateAdmin(login, password string) (*domain.User, error) {
+	user, err := r.Authenticate(login, password)
+	if err != nil {
+		return nil, errors.New("tài khoản hoặc mật khẩu quản trị viên không chính xác")
+	}
+	if user.Role != "admin" {
+		return nil, errors.New("tài khoản này không có quyền truy cập trang quản trị")
+	}
+	return user, nil
 }
 
 // GetByID returns user profile

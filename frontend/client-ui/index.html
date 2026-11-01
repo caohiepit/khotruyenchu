@@ -155,6 +155,9 @@
             </div>
           </div>
           <a href="#/library" class="nav__link" data-route="library">Truyện full</a>
+          <a href="#/library?tab=favorites" class="nav__link" id="nav-link-favorites" style="display:inline-flex; align-items:center; gap:5px;">
+            <i class="fa-solid fa-heart" style="color:#ef4444; font-size:13px;"></i> <span>Yêu thích</span>
+          </a>
         </nav>
       </div>
 
@@ -294,6 +297,13 @@
          ================================================================= -->
     <section class="view-section" id="view-library">
       <div class="library-grid-wrapper">
+        <!-- Library Tabs Filter -->
+        <div class="library-filter-tabs" style="display:flex; gap:8px; margin-bottom:16px; border-bottom: 1px solid var(--border); padding-bottom: 10px; overflow-x:auto;">
+          <button class="lib-tab-btn active" id="lib-tab-all" data-lib-tab="all"><i class="fa-solid fa-book"></i> Tất Cả Linh Thư</button>
+          <button class="lib-tab-btn" id="lib-tab-history" data-lib-tab="history"><i class="fa-solid fa-clock-rotate-left"></i> Lịch Sử Đọc</button>
+          <button class="lib-tab-btn" id="lib-tab-favorites" data-lib-tab="favorites"><i class="fa-solid fa-heart" style="color:#ef4444;"></i> Truyện Yêu Thích (<span id="lib-fav-count">0</span>)</button>
+        </div>
+
         <div class="library-controls-bar">
           <div>
             <h1 id="library-heading" style="font-size: 22px; font-weight: 800; color: var(--ink); margin: 0 0 4px;">Tất Cả Linh Thư</h1>
@@ -362,9 +372,13 @@
             <!-- Novel Genres List -->
             <div class="book-detail__genres" id="detail-genres-wrap" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;"></div>
 
-            <div class="book-detail__cta" style="margin-top: 18px;">
+            <div class="book-detail__cta" style="margin-top: 18px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
               <button class="btn btn--primary" id="btn-read-first"><i class="fa-solid fa-book-open"></i> Đọc Từ Đầu</button>
               <button class="btn btn--outline" id="btn-read-continue"><i class="fa-solid fa-bookmark"></i> <span id="btn-read-continue-text">Đọc Tiếp</span></button>
+              <button class="btn btn--outline btn-favorite" id="btn-favorite-novel" title="Lưu vào Tủ Sách Yêu Thích">
+                <i class="fa-regular fa-heart" id="icon-fav-heart"></i>
+                <span id="text-fav-novel">Yêu Thích</span>
+              </button>
             </div>
           </div>
         </div>

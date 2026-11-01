@@ -65,6 +65,65 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// handleAdminLogin authenticates administrator
+func (s *Server) handleAdminLogin(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "Dữ liệu JSON không hợp lệ."})
+		return
+	}
+
+	admin, err := s.userRepo.AuthenticateAdmin(req.Username, req.Password)
+	if err != nil {
+		jsonResponse(w, http.StatusUnauthorized, map[string]string{"error": err.Error()})
+		return
+	}
+
+	token := "admin_session_" + admin.ID
+	jsonResponse(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+		"message": "Đăng nhập trang quản trị thành công!",
+		"token":   token,
+		"admin": map[string]interface{}{
+			"id":       admin.ID,
+			"username": admin.Username,
+			"role":     admin.Role,
+			"email":    admin.Email,
+		},
+	})
+}
+
+// handleAdminVerify verifies if admin session is valid
+func (s *Server) handleAdminVerify(w http.ResponseWriter, r *http.Request) {
+	authHeader := r.Header.Get("Authorization")
+	token := strings.TrimPrefix(authHeader, "Bearer ")
+	if !strings.HasPrefix(token, "admin_session_") {
+		jsonResponse(w, http.StatusUnauthorized, map[string]string{"error": "Phiên đăng nhập quản trị không hợp lệ."})
+		return
+	}
+
+	adminID := strings.TrimPrefix(token, "admin_session_")
+	admin, err := s.userRepo.GetByID(adminID)
+	if err != nil || admin.Role != "admin" {
+		jsonResponse(w, http.StatusUnauthorized, map[string]string{"error": "Tài khoản không có quyền quản trị viên."})
+		return
+	}
+
+	jsonResponse(w, http.StatusOK, map[string]interface{}{
+		"valid": true,
+		"admin": map[string]interface{}{
+			"id":       admin.ID,
+			"username": admin.Username,
+			"role":     admin.Role,
+			"email":    admin.Email,
+		},
+	})
+}
+
 // handleGetMe returns current user info
 func (s *Server) handleGetMe(w http.ResponseWriter, r *http.Request) {
 	authHeader := r.Header.Get("Authorization")

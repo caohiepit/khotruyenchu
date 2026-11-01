@@ -2,12 +2,13 @@ package domain
 
 import "time"
 
-// User represents a registered reader on the platform
+// User represents a registered reader or admin on the platform
 type User struct {
 	ID        string    `json:"id"`
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
-	Password  string    `json:"-"`
+	Password  string    `json:"password_hash,omitempty"`
+	Role      string    `json:"role"` // "admin" or "user"
 	Realm     string    `json:"realm"` // Phàm Nhân, Luyện Khí, Trúc Cơ, Kim Đan, Nguyên Anh, Hóa Thần...
 	Exp       int       `json:"exp"`   // Tu vi (tăng khi đọc chương)
 	AvatarURL string    `json:"avatar_url"`

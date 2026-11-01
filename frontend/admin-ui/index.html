@@ -103,6 +103,21 @@
             <i class="fa-solid fa-list-ol"></i>
             <span>Mở Hàng Đợi Cào</span>
           </button>
+
+          <!-- Admin User Profile & Logout -->
+          <div class="admin-user-profile" id="admin-user-profile">
+            <div class="admin-avatar">
+              <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <div class="admin-user-info">
+              <span class="admin-uname" id="topbar-admin-username">admin</span>
+              <span class="admin-role-badge">Super Admin</span>
+            </div>
+            <button class="btn btn-sm btn-logout" id="btn-admin-logout" title="Đăng xuất tài khoản quản trị">
+              <i class="fa-solid fa-right-from-bracket"></i>
+              <span>Đăng Xuất</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -949,6 +964,56 @@
           </button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ADMIN LOGIN OVERLAY (Enforces authentication before accessing dashboard) -->
+  <div id="admin-login-overlay" class="admin-login-overlay">
+    <div class="admin-login-card">
+      <div class="admin-login-header">
+        <div class="admin-login-icon">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h2>Comics Admin Portal</h2>
+        <p>Vui lòng đăng nhập tài khoản Quản Trị Viên để truy cập bảng điều khiển</p>
+      </div>
+      
+      <form id="admin-login-form" class="admin-login-form">
+        <div id="admin-login-error" class="admin-login-alert" style="display: none;"></div>
+        
+        <div class="admin-form-group">
+          <label for="admin-login-username"><i class="fa-solid fa-user-shield"></i> Tên Đăng Nhập / Quản Trị</label>
+          <div class="admin-input-wrap">
+            <input type="text" id="admin-login-username" class="admin-input" placeholder="Nhập tài khoản admin..." required autocomplete="username" autofocus>
+          </div>
+        </div>
+        
+        <div class="admin-form-group">
+          <label for="admin-login-password"><i class="fa-solid fa-key"></i> Mật Khẩu</label>
+          <div class="admin-input-wrap">
+            <input type="password" id="admin-login-password" class="admin-input" placeholder="Nhập mật khẩu..." required autocomplete="current-password">
+            <button type="button" class="btn-toggle-admin-pwd" id="btn-toggle-admin-pwd" tabindex="-1" title="Hiện/ẩn mật khẩu">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="admin-login-credentials-hint">
+          <i class="fa-solid fa-circle-info"></i>
+          <div>Tài khoản quản trị mặc định: <strong>admin</strong> | Mật khẩu: <strong>admin123</strong></div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary btn-block btn-admin-submit" id="btn-admin-submit-login">
+          <i class="fa-solid fa-right-to-bracket"></i>
+          <span>Xác Thực & Đăng Nhập</span>
+        </button>
+        
+        <div class="admin-login-footer">
+          <a href="/" target="_blank" class="back-to-client-link">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại Giao Diện Client
+          </a>
+        </div>
+      </form>
     </div>
   </div>
 

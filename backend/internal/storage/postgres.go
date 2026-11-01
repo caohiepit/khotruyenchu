@@ -90,11 +90,24 @@ func AutoMigrate(db *sql.DB) error {
 		username VARCHAR(80) NOT NULL UNIQUE,
 		email VARCHAR(150) NOT NULL UNIQUE,
 		password_hash TEXT NOT NULL,
+		role VARCHAR(50) DEFAULT 'user',
 		realm VARCHAR(80) DEFAULT 'Phàm Nhân',
 		exp INT DEFAULT 0,
 		avatar_url TEXT DEFAULT '',
 		created_at TIMESTAMPTZ DEFAULT NOW(),
 		updated_at TIMESTAMPTZ DEFAULT NOW()
+	);
+	ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'user';
+
+	-- User Favorites table (Truyện Yêu Thích)
+	CREATE TABLE IF NOT EXISTS user_favorites (
+		id SERIAL PRIMARY KEY,
+		user_id VARCHAR(100) NOT NULL,
+		novel_slug VARCHAR(255) NOT NULL,
+		novel_title VARCHAR(255) DEFAULT '',
+		novel_cover TEXT DEFAULT '',
+		created_at TIMESTAMPTZ DEFAULT NOW(),
+		UNIQUE(user_id, novel_slug)
 	);
 
 	-- Feedback table (Phi thư truyền tin)

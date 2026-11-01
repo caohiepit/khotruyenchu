@@ -1449,10 +1449,9 @@ async function fetchHomeData() {
 function handleRouteChange() {
 
   const hash = window.location.hash || '#/';
-
-  const cleanHash = hash.startsWith('#') ? hash.slice(1) : hash;
-
-  const parts = cleanHash.split('/').filter(Boolean);
+  const rawHash = hash.startsWith('#') ? hash.slice(1) : hash;
+  const pathOnly = rawHash.split('?')[0];
+  const parts = pathOnly.split('/').filter(Boolean);
 
 
 
@@ -2508,7 +2507,18 @@ async function openLibraryView() {
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
+  // Check tab from URL
+  if (window.location.hash.includes('tab=favorites')) {
+    state.libActiveTab = 'favorites';
+  } else if (window.location.hash.includes('tab=history') || state.libMode === 'cultivation') {
+    state.libActiveTab = 'history';
+  } else if (!state.libActiveTab) {
+    state.libActiveTab = 'all';
+  }
 
+  document.querySelectorAll('.lib-tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-lib-tab') === state.libActiveTab);
+  });
 
   const headingEl = document.getElementById('library-heading');
 
@@ -2524,7 +2534,13 @@ async function openLibraryView() {
 
 
 
-  if (state.libMode === 'ranking') {
+  if (state.libActiveTab === 'favorites') {
+    if (headingEl) headingEl.textContent = 'TRUYỆN YÊU THÍCH CỦA BẠN';
+    if (subEl) subEl.textContent = 'Danh sách các bộ linh thư bạn đã đánh dấu yêu thích để tiện theo dõi';
+  } else if (state.libActiveTab === 'history' || state.libMode === 'cultivation') {
+    if (headingEl) headingEl.textContent = 'LỊCH SỬ ĐỌC TRUYỆN';
+    if (subEl) subEl.textContent = 'Các chương truyện bạn đang đọc dở gần đây nhất';
+  } else if (state.libMode === 'ranking') {
 
     if (tabBg) tabBg.style.backgroundImage = "url('assets/oriental_scroll_gallery.jpg')";
 
@@ -2537,18 +2553,6 @@ async function openLibraryView() {
     if (subEl) subEl.textContent = 'Xếp hạng các bộ đại thuyết có số lượng chương và lượt đọc cao nhất cửu giới';
 
     if (sortSelect) sortSelect.value = 'chapters';
-
-  } else if (state.libMode === 'cultivation') {
-
-    if (tabBg) tabBg.style.backgroundImage = "url('assets/oriental_sutra_mandala.jpg')";
-
-    if (tabSeal) tabSeal.textContent = '修煉';
-
-    if (tabKicker) tabKicker.innerHTML = 'TU LUYỆN ĐỘT PHÁ &bull; ĐẠO TÂM NHẬP THẦN';
-
-    if (headingEl) headingEl.textContent = 'TỦ TRUYỆN TU LUYỆN CỦA ĐẠO HỮU';
-
-    if (subEl) subEl.textContent = 'Tự động lưu giữ tiến độ đọc truyện để đạo hữu tiếp tục lĩnh ngộ và đột phá cảnh giới';
 
   } else {
 
@@ -2586,9 +2590,80 @@ function renderLibraryGrid() {
 
   if (!grid) return;
 
+  // 1. Favorites Tab
+  if (state.libActiveTab === 'favorites') {
+    if (!state.currentUser || !state.currentUser.id) {
+      grid.innerHTML = `
+        <div style="text-align: center; padding: 60px 20px; grid-column: 1 / -1; width: 100%;">
+          <i class="fa-solid fa-heart" style="font-size: 3rem; color: #ef4444; opacity: 0.7; margin-bottom: 16px; display: block;"></i>
+          <h3 style="font-size: 19px; color: var(--ink); margin-bottom: 8px;">Đăng Nhập Để Xem Truyện Yêu Thích</h3>
+          <p style="color: var(--ink-2); font-size: 14px; max-width: 440px; margin: 0 auto 20px;">Lưu giữ những bộ truyện tâm đắc nhất của đạo hữu để dễ dàng theo dõi chương mới mỗi ngày.</p>
+          <button class="btn btn--primary" id="btn-login-to-view-fav" style="padding: 11px 28px; border-radius: 99px; font-weight: 700; cursor: pointer;">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i> Đăng Nhập Ngay
+          </button>
+        </div>
+      `;
+      const btnLog = document.getElementById('btn-login-to-view-fav');
+      if (btnLog) btnLog.onclick = () => openAuthModal(false);
+      if (pagEl) pagEl.innerHTML = '';
+      return;
+    }
 
+    grid.innerHTML = `<div class="skeleton-loader" style="grid-column: 1 / -1;"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải danh sách yêu thích...</div>`;
+    fetch(`${API_BASE}/user/favorites?user_id=${encodeURIComponent(state.currentUser.id)}`)
+      .then(r => r.json())
+      .then(res => {
+        const favs = res.data || [];
+        const badge = document.getElementById('lib-fav-count');
+        if (badge) badge.textContent = favs.length;
 
-  if (state.libMode === 'cultivation') {
+        if (!favs.length) {
+          grid.innerHTML = `
+            <div style="text-align: center; padding: 60px 20px; grid-column: 1 / -1; width: 100%;">
+              <i class="fa-regular fa-heart" style="font-size: 3rem; color: var(--ink-2); opacity: 0.4; margin-bottom: 16px; display: block;"></i>
+              <h3 style="font-size: 18px; color: var(--ink); margin-bottom: 8px;">Chưa Có Truyện Yêu Thích</h3>
+              <p style="color: var(--ink-2); font-size: 14px; margin-bottom: 20px;">Khi xem chi tiết một bộ truyện bất kỳ, bấm nút "Yêu Thích" để lưu vào danh sách này.</p>
+              <button class="btn btn--outline" onclick="switchLibraryTab('all')" style="padding: 9px 24px; border-radius: 99px; font-weight: 600;">
+                <i class="fa-solid fa-book-open"></i> Khám Phá Thư Viện
+              </button>
+            </div>
+          `;
+          if (pagEl) pagEl.innerHTML = '';
+          return;
+        }
+
+        grid.innerHTML = favs.map((f, idx) => {
+          const fallback = getDistinctFallbackBySlug(f.novel_slug, idx);
+          const coverSrc = f.novel_cover ? `${API_BASE}/proxy-cover?url=${encodeURIComponent(f.novel_cover)}` : fallback;
+          return `
+            <article class="catx-card" style="position: relative;">
+              <button class="fav-card-action" onclick="event.stopPropagation(); removeFavoriteDirectly('${escapeHtml(f.novel_slug)}')" title="Bỏ yêu thích">
+                <i class="fa-solid fa-heart-crack"></i>
+              </button>
+              <a href="#/novel/${encodeURIComponent(f.novel_slug)}" class="catx-card__link">
+                <div class="catx-card__cover-wrap">
+                  <img src="${escapeHtml(coverSrc)}" alt="${escapeHtml(f.novel_title || f.novel_slug)}" class="catx-card__cover" loading="lazy" onerror="this.onerror=null;this.src='${fallback}'">
+                </div>
+                <div class="catx-card__content">
+                  <h3 class="catx-card__title">${escapeHtml(f.novel_title || f.novel_slug)}</h3>
+                  <div style="font-size: 12px; color: var(--brand); margin-top: 4px;">
+                    <i class="fa-solid fa-heart" style="color:#ef4444;"></i> Đã yêu thích
+                  </div>
+                </div>
+              </a>
+            </article>
+          `;
+        }).join('');
+        if (pagEl) pagEl.innerHTML = '';
+      })
+      .catch(err => {
+        grid.innerHTML = `<div style="grid-column: 1 / -1; color:#ef4444; padding:20px;">Lỗi tải truyện yêu thích: ${err.message}</div>`;
+      });
+    return;
+  }
+
+  // 2. History Tab / Cultivation Mode
+  if (state.libActiveTab === 'history' || state.libMode === 'cultivation') {
 
     const historyItems = Object.values(state.readingHistory).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
 
@@ -3026,6 +3101,70 @@ function renderNovelDetailUI() {
 
     }
 
+  }
+
+  // Bind Favorite Novel Button (Pre-condition: must be logged in)
+  const btnFavorite = document.getElementById('btn-favorite-novel');
+  const iconFav = document.getElementById('icon-fav-heart');
+  const textFav = document.getElementById('text-fav-novel');
+
+  const setFavState = (isFav) => {
+    if (!btnFavorite) return;
+    if (isFav) {
+      btnFavorite.classList.add('is-favorited');
+      if (iconFav) iconFav.className = 'fa-solid fa-heart';
+      if (textFav) textFav.textContent = 'Đã Yêu Thích';
+    } else {
+      btnFavorite.classList.remove('is-favorited');
+      if (iconFav) iconFav.className = 'fa-regular fa-heart';
+      if (textFav) textFav.textContent = 'Yêu Thích';
+    }
+  };
+
+  if (btnFavorite) {
+    if (state.currentUser && state.currentUser.id) {
+      fetch(`${API_BASE}/user/favorites/check?user_id=${encodeURIComponent(state.currentUser.id)}&novel_slug=${encodeURIComponent(slugKey)}`)
+        .then(r => r.json())
+        .then(d => setFavState(d.favorited))
+        .catch(() => setFavState(false));
+    } else {
+      setFavState(false);
+    }
+
+    btnFavorite.onclick = async () => {
+      // PRE-CONDITION: MUST BE LOGGED IN
+      if (!state.currentUser || !state.currentUser.id) {
+        showClientToast('Đạo hữu vui lòng đăng nhập để lưu truyện vào bộ yêu thích!', 'warning');
+        openAuthModal(false);
+        return;
+      }
+
+      try {
+        btnFavorite.disabled = true;
+        const res = await fetch(`${API_BASE}/user/favorites/toggle`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: state.currentUser.id,
+            novel_slug: slugKey,
+            novel_title: n.title,
+            novel_cover: n.cover_url || ''
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          setFavState(data.favorited);
+          showClientToast(data.message, data.favorited ? 'success' : 'info');
+          updateFavoriteNavCount();
+        } else {
+          showClientToast(data.error || 'Có lỗi xảy ra', 'error');
+        }
+      } catch (err) {
+        showClientToast('Lỗi kết nối tới máy chủ', 'error');
+      } finally {
+        btnFavorite.disabled = false;
+      }
+    };
   }
 
 
@@ -3814,7 +3953,13 @@ function bindGlobalEvents() {
 
   }
 
-
+  // Library Sub-tabs (All vs History vs Favorites)
+  document.querySelectorAll('.lib-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.getAttribute('data-lib-tab');
+      switchLibraryTab(tab);
+    });
+  });
 
   const btnToggleSynopsis = document.getElementById('btn-toggle-synopsis');
 
@@ -5076,4 +5221,101 @@ document.addEventListener('click', (e) => {
   }
 
 }, { passive: true });
+
+/* =========================================================================
+   FAVORITES (YÊU THÍCH) SYSTEM HELPERS
+   ========================================================================= */
+
+function showClientToast(message, type = 'info') {
+  let toastContainer = document.getElementById('client-toast-container');
+  if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'client-toast-container';
+    toastContainer.style.cssText = 'position: fixed; bottom: 28px; right: 28px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;';
+    document.body.appendChild(toastContainer);
+  }
+
+  const toast = document.createElement('div');
+  const bg = type === 'success' ? '#10b981' : (type === 'warning' ? '#f59e0b' : (type === 'error' ? '#ef4444' : '#3b82f6'));
+  const icon = type === 'success' ? 'fa-circle-check' : (type === 'warning' ? 'fa-triangle-exclamation' : (type === 'error' ? 'fa-circle-xmark' : 'fa-circle-info'));
+
+  toast.style.cssText = `background: ${bg}; color: #fff; padding: 12px 20px; border-radius: 12px; font-weight: 600; font-size: 13.5px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 8px; pointer-events: auto; transform: translateY(20px); opacity: 0; transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);`;
+  toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${escapeHtml(message)}</span>`;
+  toastContainer.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    toast.style.transform = 'translateY(0)';
+    toast.style.opacity = '1';
+  });
+
+  setTimeout(() => {
+    toast.style.transform = 'translateY(-10px)';
+    toast.style.opacity = '0';
+    setTimeout(() => toast.remove(), 300);
+  }, 3200);
+}
+
+async function updateFavoriteNavCount() {
+  const badge = document.getElementById('lib-fav-count');
+  if (!badge) return;
+  if (!state.currentUser || !state.currentUser.id) {
+    badge.textContent = '0';
+    return;
+  }
+  try {
+    const res = await fetch(`${API_BASE}/user/favorites?user_id=${encodeURIComponent(state.currentUser.id)}`);
+    if (res.ok) {
+      const data = await res.json();
+      badge.textContent = data.total || (data.data ? data.data.length : 0);
+    }
+  } catch (e) {
+    // ignore
+  }
+}
+
+window.switchLibraryTab = function(tabName) {
+  state.libActiveTab = tabName;
+  document.querySelectorAll('.lib-tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-lib-tab') === tabName);
+  });
+
+  const headingEl = document.getElementById('library-heading');
+  const subEl = document.getElementById('library-sub');
+
+  if (tabName === 'favorites') {
+    if (headingEl) headingEl.textContent = 'TRUYỆN YÊU THÍCH CỦA BẠN';
+    if (subEl) subEl.textContent = 'Danh sách các bộ linh thư bạn đã đánh dấu yêu thích để tiện theo dõi';
+  } else if (tabName === 'history') {
+    if (headingEl) headingEl.textContent = 'LỊCH SỬ ĐỌC TRUYỆN';
+    if (subEl) subEl.textContent = 'Các chương truyện bạn đang đọc dở gần đây nhất';
+  } else {
+    if (headingEl) headingEl.textContent = 'TÀNG KINH CÁC LINH THƯ';
+    if (subEl) subEl.textContent = 'Khám phá toàn bộ vạn bộ danh tác tiên hiệp, kiếm hiệp, huyền huyễn vô thượng';
+  }
+
+  state.libPage = 1;
+  renderLibraryGrid();
+};
+
+window.removeFavoriteDirectly = async function(novelSlug) {
+  if (!state.currentUser || !state.currentUser.id) return;
+  try {
+    const res = await fetch(`${API_BASE}/user/favorites/toggle`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: state.currentUser.id,
+        novel_slug: novelSlug
+      })
+    });
+    if (res.ok) {
+      showClientToast('Đã bỏ truyện khỏi Tủ Sách Yêu Thích', 'info');
+      updateFavoriteNavCount();
+      renderLibraryGrid();
+    }
+  } catch (e) {
+    showClientToast('Lỗi khi bỏ yêu thích', 'error');
+  }
+};
+
 

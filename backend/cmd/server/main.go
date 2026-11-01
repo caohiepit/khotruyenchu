@@ -192,6 +192,7 @@ func main() {
 
 	userRepo := storage.NewUserRepository(db, storageDir)
 	feedbackRepo := storage.NewFeedbackRepository(db, storageDir)
+	favoriteRepo := storage.NewFavoriteRepository(db, storageDir)
 
 
 
@@ -237,7 +238,7 @@ func main() {
 
 	// 6. HTTP API Server
 
-	srv := api.NewServer(novelRepo, queueRepo, sourceRepo, affiliateRepo, userRepo, feedbackRepo, engine, dailyScanner, registry, adminUIDir, clientUIDir)
+	srv := api.NewServer(novelRepo, queueRepo, sourceRepo, affiliateRepo, userRepo, feedbackRepo, favoriteRepo, engine, dailyScanner, registry, adminUIDir, clientUIDir)
 
 
 

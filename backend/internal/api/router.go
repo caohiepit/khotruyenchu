@@ -18,6 +18,7 @@ type Server struct {
 	affiliateRepo *storage.AffiliateRepository
 	userRepo      *storage.UserRepository
 	feedbackRepo  *storage.FeedbackRepository
+	favoriteRepo  *storage.FavoriteRepository
 	engine        *crawler.Engine
 	scheduler     *scheduler.DailyScanner
 	registry      *crawler.HandlerRegistry
@@ -32,6 +33,7 @@ func NewServer(
 	affiliateRepo *storage.AffiliateRepository,
 	userRepo *storage.UserRepository,
 	feedbackRepo *storage.FeedbackRepository,
+	favoriteRepo *storage.FavoriteRepository,
 	engine *crawler.Engine,
 	scheduler *scheduler.DailyScanner,
 	registry *crawler.HandlerRegistry,
@@ -50,6 +52,7 @@ func NewServer(
 		affiliateRepo: affiliateRepo,
 		userRepo:      userRepo,
 		feedbackRepo:  feedbackRepo,
+		favoriteRepo:  favoriteRepo,
 		engine:        engine,
 		scheduler:     scheduler,
 		registry:      registry,
@@ -126,6 +129,15 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("POST /api/auth/login", s.handleLogin)
 	s.mux.HandleFunc("GET /api/auth/me", s.handleGetMe)
 	s.mux.HandleFunc("POST /api/user/read-chapter", s.handleUserReadChapter)
+
+	// Admin Auth API
+	s.mux.HandleFunc("POST /api/admin/login", s.handleAdminLogin)
+	s.mux.HandleFunc("GET /api/admin/auth/verify", s.handleAdminVerify)
+
+	// Reader Favorites API (Tủ Sách Yêu Thích)
+	s.mux.HandleFunc("POST /api/user/favorites/toggle", s.handleToggleFavorite)
+	s.mux.HandleFunc("GET /api/user/favorites", s.handleGetFavorites)
+	s.mux.HandleFunc("GET /api/user/favorites/check", s.handleCheckFavorite)
 
 	// Feedback API (Phi Thư Truyền Tin)
 	s.mux.HandleFunc("POST /api/feedback", s.handleCreateFeedback)
