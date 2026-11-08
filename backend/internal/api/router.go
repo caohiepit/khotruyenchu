@@ -19,6 +19,7 @@ type Server struct {
 	userRepo      *storage.UserRepository
 	feedbackRepo  *storage.FeedbackRepository
 	favoriteRepo  *storage.FavoriteRepository
+	commentRepo   *storage.CommentRepository
 	engine        *crawler.Engine
 	scheduler     *scheduler.DailyScanner
 	registry      *crawler.HandlerRegistry
@@ -34,6 +35,7 @@ func NewServer(
 	userRepo *storage.UserRepository,
 	feedbackRepo *storage.FeedbackRepository,
 	favoriteRepo *storage.FavoriteRepository,
+	commentRepo *storage.CommentRepository,
 	engine *crawler.Engine,
 	scheduler *scheduler.DailyScanner,
 	registry *crawler.HandlerRegistry,
@@ -53,6 +55,7 @@ func NewServer(
 		userRepo:      userRepo,
 		feedbackRepo:  feedbackRepo,
 		favoriteRepo:  favoriteRepo,
+		commentRepo:   commentRepo,
 		engine:        engine,
 		scheduler:     scheduler,
 		registry:      registry,
@@ -103,6 +106,12 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("GET /api/chapters/{id}", s.handleGetChapterContent)
 	s.mux.HandleFunc("GET /api/genres", s.handleGetGenres)
 	s.mux.HandleFunc("GET /api/proxy-cover", s.handleProxyCover)
+
+	// Novel Comments & Discussion API (Đàm Đạo Linh Thư)
+	s.mux.HandleFunc("GET /api/novels/{id}/comments", s.handleGetNovelComments)
+	s.mux.HandleFunc("POST /api/novels/{id}/comments", s.handleCreateNovelComment)
+	s.mux.HandleFunc("DELETE /api/novels/{id}/comments/{comment_id}", s.handleDeleteNovelComment)
+	s.mux.HandleFunc("POST /api/novels/{id}/comments/{comment_id}/like", s.handleLikeNovelComment)
 
 	// Automated Ingestion & Queue API
 	// 🚀 Unified Endpoint: Paste ANY URL -> Auto Resolve -> Auto Enqueue -> Auto Worker Crawl!

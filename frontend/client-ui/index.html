@@ -403,6 +403,43 @@
             <div class="pagination-bar" id="detail-chapter-pagination"></div>
           </div>
         </div>
+
+        <!-- =============================================================
+             NOVEL COMMENTS & DISCUSSION (ĐÀM ĐẠO LINH THƯ)
+             ============================================================= -->
+        <section class="novel-comments-section" id="novel-comments-section">
+          <div class="comments-header">
+            <div class="comments-title-wrap">
+              <h2 class="comments-title">
+                <i class="fa-solid fa-comments text-cyan"></i>
+                <span>Đàm Đạo & Bình Luận</span>
+                <span class="comments-count-pill" id="comments-total-count">0</span>
+              </h2>
+              <p class="comments-subtitle">Nơi chư vị đạo hữu cùng bàn luận tình tiết, chia sẻ cảm ngộ về bộ linh thư này</p>
+            </div>
+            <button class="btn btn-sm btn-outline" id="btn-refresh-comments" title="Làm mới bình luận">
+              <i class="fa-solid fa-arrows-rotate" id="icon-refresh-comments"></i>
+              <span>Làm mới</span>
+            </button>
+          </div>
+
+          <!-- Comment Input Card (Form for logged-in or Prompt for guests) -->
+          <div class="comment-input-card" id="comment-input-card">
+            <!-- Dynamic content -->
+          </div>
+
+          <!-- Comments List Wrapper -->
+          <div class="comments-list-wrapper">
+            <div class="comments-list" id="novel-comments-list">
+              <!-- Dynamically populated comments -->
+            </div>
+            <div class="comments-empty-state" id="comments-empty-state" style="display: none;">
+              <div class="empty-icon"><i class="fa-regular fa-comment-dots"></i></div>
+              <h4>Chưa có lời đàm đạo nào</h4>
+              <p>Chưa có vị đạo hữu nào lưu lại bình phẩm. Hãy là người đầu tiên khai mở đàm đạo!</p>
+            </div>
+          </div>
+        </section>
       </div>
     </section>
 

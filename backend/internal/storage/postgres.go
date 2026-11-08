@@ -120,6 +120,21 @@ func AutoMigrate(db *sql.DB) error {
 	ALTER TABLE feedback DROP COLUMN IF EXISTS name;
 	ALTER TABLE feedback DROP COLUMN IF EXISTS contact;
 
+	-- Comments table (Đàm Đạo & Bình Luận Truyện)
+	CREATE TABLE IF NOT EXISTS comments (
+		id SERIAL PRIMARY KEY,
+		novel_slug VARCHAR(255) NOT NULL,
+		user_id VARCHAR(100) NOT NULL,
+		username VARCHAR(100) NOT NULL,
+		user_avatar TEXT DEFAULT '',
+		user_realm VARCHAR(100) DEFAULT 'Phàm Nhân',
+		role VARCHAR(50) DEFAULT 'user',
+		content TEXT NOT NULL,
+		likes INT DEFAULT 0,
+		created_at TIMESTAMPTZ DEFAULT NOW()
+	);
+	CREATE INDEX IF NOT EXISTS idx_comments_novel_slug ON comments (novel_slug, created_at DESC);
+
 	-- Seed default sources if table is empty
 	INSERT INTO sources (name, slug, domain, base_url, catalog_url, is_active, scan_interval_hours)
 	VALUES 

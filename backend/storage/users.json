@@ -17,10 +17,10 @@
     "email": "tieuviem@tu-tien.vn",
     "role": "user",
     "realm": "Kim Đan Kỳ",
-    "exp": 2800,
+    "exp": 2810,
     "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=TieuViem",
     "created_at": "2026-10-31T10:35:10.730764+07:00",
-    "updated_at": "2026-10-31T10:35:10.730764+07:00"
+    "updated_at": "2026-11-08T20:48:18.9621176+07:00"
   },
   {
     "id": "usr-371800",
@@ -28,9 +28,9 @@
     "email": "thang@tu-tien.vn",
     "role": "user",
     "realm": "Phàm Nhân",
-    "exp": 35,
+    "exp": 45,
     "avatar_url": "https://api.dicebear.com/7.x/bottts/svg?seed=DaoHuuThang",
     "created_at": "2026-10-31T10:38:36.4193718+07:00",
-    "updated_at": "2026-10-31T10:38:53.8800396+07:00"
+    "updated_at": "2026-11-08T20:48:05.9218739+07:00"
   }
 ]

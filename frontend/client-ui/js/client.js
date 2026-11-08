@@ -3217,6 +3217,23 @@ function renderNovelDetailUI() {
 
   }
 
+  // Initialize Novel Comments & Discussion
+  renderCommentInputBox(slugKey);
+  loadNovelComments(slugKey);
+
+  const btnRefreshCmt = document.getElementById('btn-refresh-comments');
+  if (btnRefreshCmt) {
+    btnRefreshCmt.onclick = () => {
+      const icon = document.getElementById('icon-refresh-comments');
+      if (icon) icon.classList.add('fa-spin');
+      loadNovelComments(slugKey).finally(() => {
+        setTimeout(() => {
+          if (icon) icon.classList.remove('fa-spin');
+        }, 500);
+      });
+    };
+  }
+
 }
 
 
@@ -4564,6 +4581,12 @@ function renderUserBadge() {
 
   }
 
+  // Update comment box if on novel detail page
+  if (state.currentNovel && (state.currentNovel.slug || state.currentNovel.id)) {
+    const slugKey = state.currentNovel.slug || state.currentNovel.id;
+    renderCommentInputBox(slugKey);
+  }
+
 }
 
 
@@ -5317,5 +5340,273 @@ window.removeFavoriteDirectly = async function(novelSlug) {
     showClientToast('Lỗi khi bỏ yêu thích', 'error');
   }
 };
+
+// =========================================================================
+// NOVEL COMMENTS & DISCUSSION CONTROLLER (ĐÀM ĐẠO LINH THƯ)
+// =========================================================================
+
+function formatRelativeTime(dateStr) {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffSec = Math.floor((now - date) / 1000);
+
+  if (diffSec < 60) return 'Vừa xong';
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin} phút trước`;
+  const diffHour = Math.floor(diffMin / 60);
+  if (diffHour < 24) return `${diffHour} giờ trước`;
+  const diffDay = Math.floor(diffHour / 24);
+  if (diffDay < 30) return `${diffDay} ngày trước`;
+
+  return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+function getRealmClass(realmName) {
+  if (!realmName) return 'realm-pham-nhan';
+  const r = realmName.toLowerCase();
+  if (r.includes('phàm nhân')) return 'realm-pham-nhan';
+  if (r.includes('luyện khí')) return 'realm-luyen-khi';
+  if (r.includes('trúc cơ')) return 'realm-truc-co';
+  if (r.includes('kim đan')) return 'realm-kim-dan';
+  if (r.includes('nguyên anh')) return 'realm-nguyen-anh';
+  if (r.includes('hóa thần') || r.includes('luyện hư')) return 'realm-hoa-than';
+  if (r.includes('độ kiếp') || r.includes('đại thừa')) return 'realm-hoa-than';
+  return 'realm-pham-nhan';
+}
+
+function renderCommentInputBox(slug) {
+  const card = document.getElementById('comment-input-card');
+  if (!card) return;
+
+  if (state.currentUser && state.currentUser.username) {
+    const u = state.currentUser;
+    const avatar = u.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(u.username)}`;
+    const realm = u.realm || 'Phàm Nhân';
+    const realmClass = getRealmClass(realm);
+
+    card.innerHTML = `
+      <div class="comment-form-user-meta">
+        <img src="${escapeHtml(avatar)}" alt="${escapeHtml(u.username)}" class="comment-form-avatar">
+        <div>
+          <span class="comment-form-username">${escapeHtml(u.username)}</span>
+          <span class="comment-realm-badge ${realmClass}" style="margin-left: 6px;">${escapeHtml(realm)}</span>
+          ${u.role === 'admin' ? '<span class="comment-realm-badge realm-admin" style="margin-left: 4px;">Quản Trị</span>' : ''}
+        </div>
+      </div>
+      <form id="form-novel-comment">
+        <div class="comment-textarea-wrap">
+          <textarea id="comment-textarea-input" class="comment-textarea" placeholder="Cùng chư vị đạo hữu bàn luận về tình tiết, nhân vật của bộ linh thư này..." maxlength="1500" required></textarea>
+        </div>
+        <div class="comment-form-footer">
+          <span class="comment-char-count" id="comment-char-counter">0 / 1500 ký tự</span>
+          <button type="submit" class="comment-btn-submit" id="btn-submit-comment">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span>Gửi Đàm Đạo (+10 Tu Vi)</span>
+          </button>
+        </div>
+      </form>
+    `;
+
+    const textarea = document.getElementById('comment-textarea-input');
+    const counter = document.getElementById('comment-char-counter');
+    const form = document.getElementById('form-novel-comment');
+    const submitBtn = document.getElementById('btn-submit-comment');
+
+    if (textarea && counter) {
+      textarea.addEventListener('input', () => {
+        counter.textContent = `${textarea.value.length} / 1500 ký tự`;
+      });
+    }
+
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const content = textarea.value.trim();
+        if (!content) return;
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...';
+
+        try {
+          const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || `token_${u.id}`;
+          const res = await fetch(`${API_BASE}/novels/${encodeURIComponent(slug)}/comments`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ content })
+          });
+
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.error || 'Lỗi khi gửi bình luận');
+          }
+
+          textarea.value = '';
+          if (counter) counter.textContent = '0 / 1500 ký tự';
+          showClientToast(data.message || 'Gửi đàm đạo thành công! (+10 Tu Vi)', 'success');
+          loadNovelComments(slug);
+        } catch (err) {
+          showClientToast(err.message, 'error');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> <span>Gửi Đàm Đạo (+10 Tu Vi)</span>';
+        }
+      });
+    }
+  } else {
+    // Guest prompt
+    card.innerHTML = `
+      <div class="comment-guest-prompt">
+        <div class="guest-prompt-left">
+          <div class="guest-prompt-icon">
+            <i class="fa-solid fa-feather-pointed"></i>
+          </div>
+          <div class="guest-prompt-text">
+            <h4>Đăng nhập để tham gia đàm đạo</h4>
+            <p>Chia sẻ cảm ngộ cùng chư vị đạo hữu và nhận ngay +10 điểm Tu Vi cho mỗi lần bình phẩm!</p>
+          </div>
+        </div>
+        <button class="btn btn--primary btn-guest-login" id="btn-comments-login">
+          <i class="fa-solid fa-right-to-bracket"></i>
+          <span>Đăng Nhập Ngay</span>
+        </button>
+      </div>
+    `;
+
+    const btnLogin = document.getElementById('btn-comments-login');
+    if (btnLogin) {
+      btnLogin.addEventListener('click', () => openAuthModal(false));
+    }
+  }
+}
+
+async function loadNovelComments(slug) {
+  const listEl = document.getElementById('novel-comments-list');
+  const emptyEl = document.getElementById('comments-empty-state');
+  const countEl = document.getElementById('comments-total-count');
+
+  if (!listEl) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/novels/${encodeURIComponent(slug)}/comments`);
+    if (!res.ok) throw new Error('Không thể tải bình luận');
+    const data = await res.json();
+
+    const comments = data.comments || [];
+    const total = data.total || comments.length;
+
+    if (countEl) countEl.textContent = total;
+
+    if (comments.length === 0) {
+      listEl.innerHTML = '';
+      if (emptyEl) emptyEl.style.display = 'block';
+      return;
+    }
+
+    if (emptyEl) emptyEl.style.display = 'none';
+
+    const currentUserId = state.currentUser ? state.currentUser.id : null;
+    const isCurrentUserAdmin = state.currentUser ? state.currentUser.role === 'admin' : false;
+
+    listEl.innerHTML = comments.map(c => {
+      const avatar = c.user_avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(c.username)}`;
+      const realm = c.user_realm || 'Phàm Nhân';
+      const realmClass = getRealmClass(realm);
+      const isOwnerOrAdmin = currentUserId && (currentUserId === c.user_id || isCurrentUserAdmin);
+
+      return `
+        <div class="comment-item" id="comment-node-${c.id}">
+          <div class="comment-item-header">
+            <div class="comment-author-info">
+              <img src="${escapeHtml(avatar)}" alt="${escapeHtml(c.username)}" class="comment-avatar">
+              <div>
+                <span class="comment-author-name">${escapeHtml(c.username)}</span>
+                <span class="comment-realm-badge ${realmClass}">${escapeHtml(realm)}</span>
+                ${c.role === 'admin' ? '<span class="comment-realm-badge realm-admin">Quản Trị</span>' : ''}
+              </div>
+            </div>
+            <span class="comment-timestamp">
+              <i class="fa-regular fa-clock"></i>
+              ${escapeHtml(formatRelativeTime(c.created_at))}
+            </span>
+          </div>
+
+          <div class="comment-item-body">${escapeHtml(c.content)}</div>
+
+          <div class="comment-item-actions">
+            <button class="btn-comment-action btn-like" onclick="handleLikeComment(${c.id}, this)" title="Tâm đắc ý kiến này">
+              <i class="fa-regular fa-thumbs-up"></i>
+              <span class="like-count">${c.likes || 0}</span>
+            </button>
+            ${isOwnerOrAdmin ? `
+              <button class="btn-comment-action btn-delete" onclick="handleDeleteComment('${escapeHtml(slug)}', ${c.id})" title="Xóa lời đàm đạo này">
+                <i class="fa-regular fa-trash-can"></i>
+                <span>Xóa</span>
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('Error loading comments:', err);
+  }
+}
+
+window.handleLikeComment = async function(commentId, btn) {
+  try {
+    const res = await fetch(`${API_BASE}/novels/any/comments/${commentId}/like`, { method: 'POST' });
+    if (!res.ok) return;
+    const data = await res.json();
+    const countSpan = btn.querySelector('.like-count');
+    if (countSpan) countSpan.textContent = data.likes;
+    btn.classList.add('liked');
+    const icon = btn.querySelector('i');
+    if (icon) icon.className = 'fa-solid fa-thumbs-up';
+  } catch (err) {
+    console.error('Like failed:', err);
+  }
+};
+
+window.handleDeleteComment = async function(slug, commentId) {
+  if (!confirm('Đạo hữu có chắc chắn muốn xóa lời đàm đạo này không?')) {
+    return;
+  }
+
+  const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || (state.currentUser ? `token_${state.currentUser.id}` : '');
+  try {
+    const res = await fetch(`${API_BASE}/novels/${encodeURIComponent(slug)}/comments/${commentId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Không thể xóa bình luận');
+    }
+
+    showClientToast('Đã xóa bình luận thành công.', 'info');
+    const node = document.getElementById(`comment-node-${commentId}`);
+    if (node) {
+      node.style.transition = 'opacity 0.3s, transform 0.3s';
+      node.style.opacity = '0';
+      node.style.transform = 'translateY(-10px)';
+      setTimeout(() => {
+        node.remove();
+        loadNovelComments(slug);
+      }, 300);
+    } else {
+      loadNovelComments(slug);
+    }
+  } catch (err) {
+    showClientToast(err.message, 'error');
+  }
+};
+
 
 
