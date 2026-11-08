@@ -124,16 +124,19 @@ func AutoMigrate(db *sql.DB) error {
 	CREATE TABLE IF NOT EXISTS comments (
 		id SERIAL PRIMARY KEY,
 		novel_slug VARCHAR(255) NOT NULL,
+		parent_id INT DEFAULT 0,
 		user_id VARCHAR(100) NOT NULL,
 		username VARCHAR(100) NOT NULL,
 		user_avatar TEXT DEFAULT '',
-		user_realm VARCHAR(100) DEFAULT 'Phàm Nhân',
 		role VARCHAR(50) DEFAULT 'user',
 		content TEXT NOT NULL,
 		likes INT DEFAULT 0,
 		created_at TIMESTAMPTZ DEFAULT NOW()
 	);
+	ALTER TABLE comments ADD COLUMN IF NOT EXISTS parent_id INT DEFAULT 0;
+	ALTER TABLE comments DROP COLUMN IF EXISTS user_realm;
 	CREATE INDEX IF NOT EXISTS idx_comments_novel_slug ON comments (novel_slug, created_at DESC);
+	CREATE INDEX IF NOT EXISTS idx_comments_parent_id ON comments (parent_id);
 
 	-- Seed default sources if table is empty
 	INSERT INTO sources (name, slug, domain, base_url, catalog_url, is_active, scan_interval_hours)

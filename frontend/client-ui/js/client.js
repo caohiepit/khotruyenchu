@@ -5433,19 +5433,6 @@ function formatRelativeTime(dateStr) {
   return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
-function getRealmClass(realmName) {
-  if (!realmName) return 'realm-pham-nhan';
-  const r = realmName.toLowerCase();
-  if (r.includes('phàm nhân')) return 'realm-pham-nhan';
-  if (r.includes('luyện khí')) return 'realm-luyen-khi';
-  if (r.includes('trúc cơ')) return 'realm-truc-co';
-  if (r.includes('kim đan')) return 'realm-kim-dan';
-  if (r.includes('nguyên anh')) return 'realm-nguyen-anh';
-  if (r.includes('hóa thần') || r.includes('luyện hư')) return 'realm-hoa-than';
-  if (r.includes('độ kiếp') || r.includes('đại thừa')) return 'realm-hoa-than';
-  return 'realm-pham-nhan';
-}
-
 function renderCommentInputBox(slug) {
   const card = document.getElementById('comment-input-card');
   if (!card) return;
@@ -5453,27 +5440,24 @@ function renderCommentInputBox(slug) {
   if (state.currentUser && state.currentUser.username) {
     const u = state.currentUser;
     const avatar = u.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(u.username)}`;
-    const realm = u.realm || 'Phàm Nhân';
-    const realmClass = getRealmClass(realm);
 
     card.innerHTML = `
       <div class="comment-form-user-meta">
         <img src="${escapeHtml(avatar)}" alt="${escapeHtml(u.username)}" class="comment-form-avatar">
         <div>
           <span class="comment-form-username">${escapeHtml(u.username)}</span>
-          <span class="comment-realm-badge ${realmClass}" style="margin-left: 6px;">${escapeHtml(realm)}</span>
-          ${u.role === 'admin' ? '<span class="comment-realm-badge realm-admin" style="margin-left: 4px;">Quản Trị</span>' : ''}
+          ${u.role === 'admin' ? '<span class="comment-admin-badge" style="margin-left: 6px;">Quản Trị</span>' : ''}
         </div>
       </div>
       <form id="form-novel-comment">
         <div class="comment-textarea-wrap">
-          <textarea id="comment-textarea-input" class="comment-textarea" placeholder="Cùng chư vị đạo hữu bàn luận về tình tiết, nhân vật của bộ linh thư này..." maxlength="1500" required></textarea>
+          <textarea id="comment-textarea-input" class="comment-textarea" placeholder="Viết bình luận, chia sẻ cảm nghĩ về bộ truyện này..." maxlength="1500" required></textarea>
         </div>
         <div class="comment-form-footer">
           <span class="comment-char-count" id="comment-char-counter">0 / 1500 ký tự</span>
           <button type="submit" class="comment-btn-submit" id="btn-submit-comment">
             <i class="fa-solid fa-paper-plane"></i>
-            <span>Gửi Đàm Đạo (+10 Tu Vi)</span>
+            <span>Gửi bình luận</span>
           </button>
         </div>
       </form>
@@ -5507,7 +5491,7 @@ function renderCommentInputBox(slug) {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ content })
+            body: JSON.stringify({ content, parent_id: 0 })
           });
 
           const data = await res.json();
@@ -5517,13 +5501,13 @@ function renderCommentInputBox(slug) {
 
           textarea.value = '';
           if (counter) counter.textContent = '0 / 1500 ký tự';
-          showClientToast(data.message || 'Gửi đàm đạo thành công! (+10 Tu Vi)', 'success');
+          showClientToast(data.message || 'Đã gửi bình luận thành công!', 'success');
           loadNovelComments(slug);
         } catch (err) {
           showClientToast(err.message, 'error');
         } finally {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> <span>Gửi Đàm Đạo (+10 Tu Vi)</span>';
+          submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> <span>Gửi bình luận</span>';
         }
       });
     }
@@ -5536,8 +5520,8 @@ function renderCommentInputBox(slug) {
             <i class="fa-solid fa-feather-pointed"></i>
           </div>
           <div class="guest-prompt-text">
-            <h4>Đăng nhập để tham gia đàm đạo</h4>
-            <p>Chia sẻ cảm ngộ cùng chư vị đạo hữu và nhận ngay +10 điểm Tu Vi cho mỗi lần bình phẩm!</p>
+            <h4>Đăng nhập để tham gia bình luận</h4>
+            <p>Chia sẻ cảm nghĩ, bàn luận cùng cộng đồng độc giả về bộ truyện!</p>
           </div>
         </div>
         <button class="btn btn--primary btn-guest-login" id="btn-comments-login">
@@ -5584,9 +5568,8 @@ async function loadNovelComments(slug) {
 
     listEl.innerHTML = comments.map(c => {
       const avatar = c.user_avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(c.username)}`;
-      const realm = c.user_realm || 'Phàm Nhân';
-      const realmClass = getRealmClass(realm);
       const isOwnerOrAdmin = currentUserId && (currentUserId === c.user_id || isCurrentUserAdmin);
+      const replies = c.replies || [];
 
       return `
         <div class="comment-item" id="comment-node-${c.id}">
@@ -5595,8 +5578,7 @@ async function loadNovelComments(slug) {
               <img src="${escapeHtml(avatar)}" alt="${escapeHtml(c.username)}" class="comment-avatar">
               <div>
                 <span class="comment-author-name">${escapeHtml(c.username)}</span>
-                <span class="comment-realm-badge ${realmClass}">${escapeHtml(realm)}</span>
-                ${c.role === 'admin' ? '<span class="comment-realm-badge realm-admin">Quản Trị</span>' : ''}
+                ${c.role === 'admin' ? '<span class="comment-admin-badge" style="margin-left: 6px;">Quản Trị</span>' : ''}
               </div>
             </div>
             <span class="comment-timestamp">
@@ -5608,17 +5590,79 @@ async function loadNovelComments(slug) {
           <div class="comment-item-body">${escapeHtml(c.content)}</div>
 
           <div class="comment-item-actions">
-            <button class="btn-comment-action btn-like" onclick="handleLikeComment(${c.id}, this)" title="Tâm đắc ý kiến này">
+            <button class="btn-comment-action btn-like" onclick="handleLikeComment(${c.id}, this)" title="Thích bình luận này">
               <i class="fa-regular fa-thumbs-up"></i>
               <span class="like-count">${c.likes || 0}</span>
             </button>
+            <button class="btn-comment-action btn-reply" onclick="toggleReplyBox(${c.id})" title="Trả lời bình luận này">
+              <i class="fa-regular fa-comment-dots"></i>
+              <span>Trả lời</span>
+            </button>
             ${isOwnerOrAdmin ? `
-              <button class="btn-comment-action btn-delete" onclick="handleDeleteComment('${escapeHtml(slug)}', ${c.id})" title="Xóa lời đàm đạo này">
+              <button class="btn-comment-action btn-delete" onclick="handleDeleteComment('${escapeHtml(slug)}', ${c.id})" title="Xóa bình luận này">
                 <i class="fa-regular fa-trash-can"></i>
                 <span>Xóa</span>
               </button>
             ` : ''}
           </div>
+
+          <!-- Khung trả lời inline (Tối đa 1 cấp) -->
+          <div class="comment-reply-box" id="reply-box-${c.id}" style="display: none;">
+            <textarea class="comment-reply-textarea" id="reply-textarea-${c.id}" placeholder="Viết phản hồi cho ${escapeHtml(c.username)}..." maxlength="1500"></textarea>
+            <div class="comment-reply-form-footer">
+              <button type="button" class="btn-reply-cancel" onclick="cancelReply(${c.id})">Hủy</button>
+              <button type="button" class="btn-reply-submit" id="btn-submit-reply-${c.id}" onclick="submitReply('${escapeHtml(slug)}', ${c.id})">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span>Gửi phản hồi</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Danh sách câu trả lời lồng tối đa 1 cấp -->
+          ${replies.length > 0 ? `
+            <div class="comment-replies-list">
+              ${replies.map(rep => {
+                const repAvatar = rep.user_avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(rep.username)}`;
+                const isRepOwnerOrAdmin = currentUserId && (currentUserId === rep.user_id || isCurrentUserAdmin);
+                return `
+                  <div class="comment-reply-item" id="comment-node-${rep.id}">
+                    <div class="comment-item-header">
+                      <div class="comment-author-info">
+                        <img src="${escapeHtml(repAvatar)}" alt="${escapeHtml(rep.username)}" class="comment-reply-avatar">
+                        <div>
+                          <span class="comment-reply-author-name">${escapeHtml(rep.username)}</span>
+                          ${rep.role === 'admin' ? '<span class="comment-admin-badge" style="margin-left: 6px;">Quản Trị</span>' : ''}
+                        </div>
+                      </div>
+                      <span class="comment-timestamp">
+                        <i class="fa-regular fa-clock"></i>
+                        ${escapeHtml(formatRelativeTime(rep.created_at))}
+                      </span>
+                    </div>
+
+                    <div class="comment-reply-body">${escapeHtml(rep.content)}</div>
+
+                    <div class="comment-reply-actions">
+                      <button class="btn-comment-action btn-like" onclick="handleLikeComment(${rep.id}, this)" title="Thích câu trả lời này">
+                        <i class="fa-regular fa-thumbs-up"></i>
+                        <span class="like-count">${rep.likes || 0}</span>
+                      </button>
+                      <button class="btn-comment-action btn-reply" onclick="toggleReplyBox(${c.id}, '${escapeHtml(rep.username)}')" title="Trả lời ${escapeHtml(rep.username)}">
+                        <i class="fa-regular fa-comment-dots"></i>
+                        <span>Trả lời</span>
+                      </button>
+                      ${isRepOwnerOrAdmin ? `
+                        <button class="btn-comment-action btn-delete" onclick="handleDeleteComment('${escapeHtml(slug)}', ${rep.id})" title="Xóa phản hồi này">
+                          <i class="fa-regular fa-trash-can"></i>
+                          <span>Xóa</span>
+                        </button>
+                      ` : ''}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          ` : ''}
         </div>
       `;
     }).join('');
@@ -5626,6 +5670,97 @@ async function loadNovelComments(slug) {
     console.error('Error loading comments:', err);
   }
 }
+
+window.toggleReplyBox = function(rootCommentId, replyToUsername) {
+  if (!state.currentUser || !state.currentUser.username) {
+    showClientToast('Đạo hữu vui lòng đăng nhập để trả lời bình luận!', 'info');
+    openAuthModal(false);
+    return;
+  }
+
+  const box = document.getElementById(`reply-box-${rootCommentId}`);
+  const textarea = document.getElementById(`reply-textarea-${rootCommentId}`);
+  if (!box || !textarea) return;
+
+  if (box.style.display === 'none' || box.style.display === '') {
+    box.style.display = 'flex';
+    if (replyToUsername) {
+      textarea.value = `@${replyToUsername} `;
+    } else {
+      textarea.value = '';
+    }
+    textarea.focus();
+    // Di chuyển con trỏ xuống cuối chữ
+    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+  } else {
+    if (replyToUsername) {
+      textarea.value = `@${replyToUsername} `;
+      textarea.focus();
+      textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+    } else {
+      box.style.display = 'none';
+    }
+  }
+};
+
+window.cancelReply = function(rootCommentId) {
+  const box = document.getElementById(`reply-box-${rootCommentId}`);
+  const textarea = document.getElementById(`reply-textarea-${rootCommentId}`);
+  if (box) box.style.display = 'none';
+  if (textarea) textarea.value = '';
+};
+
+window.submitReply = async function(slug, rootCommentId) {
+  if (!state.currentUser || !state.currentUser.username) {
+    showClientToast('Vui lòng đăng nhập để gửi phản hồi.', 'info');
+    openAuthModal(false);
+    return;
+  }
+
+  const textarea = document.getElementById(`reply-textarea-${rootCommentId}`);
+  const submitBtn = document.getElementById(`btn-submit-reply-${rootCommentId}`);
+  if (!textarea) return;
+
+  const content = textarea.value.trim();
+  if (!content) {
+    showClientToast('Vui lòng nhập nội dung phản hồi.', 'error');
+    return;
+  }
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...';
+  }
+
+  try {
+    const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || `token_${state.currentUser.id}`;
+    const res = await fetch(`${API_BASE}/novels/${encodeURIComponent(slug)}/comments`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ content, parent_id: rootCommentId })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Lỗi khi gửi phản hồi');
+    }
+
+    textarea.value = '';
+    cancelReply(rootCommentId);
+    showClientToast(data.message || 'Đã gửi câu trả lời thành công!', 'success');
+    loadNovelComments(slug);
+  } catch (err) {
+    showClientToast(err.message, 'error');
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> <span>Gửi phản hồi</span>';
+    }
+  }
+};
 
 window.handleLikeComment = async function(commentId, btn) {
   try {
@@ -5643,7 +5778,7 @@ window.handleLikeComment = async function(commentId, btn) {
 };
 
 window.handleDeleteComment = async function(slug, commentId) {
-  if (!confirm('Đạo hữu có chắc chắn muốn xóa lời đàm đạo này không?')) {
+  if (!confirm('Đạo hữu có chắc chắn muốn xóa bình luận này không?')) {
     return;
   }
 

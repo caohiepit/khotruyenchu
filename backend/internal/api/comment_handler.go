@@ -84,7 +84,8 @@ func (s *Server) handleCreateNovelComment(w http.ResponseWriter, r *http.Request
 
 	// 2. Decode payload
 	var req struct {
-		Content string `json:"content"`
+		Content  string `json:"content"`
+		ParentID int    `json:"parent_id"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		jsonResponse(w, http.StatusBadRequest, map[string]string{"error": "Dữ liệu JSON không hợp lệ."})
@@ -107,27 +108,25 @@ func (s *Server) handleCreateNovelComment(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// 4. Save to Repository
+	// 4. Save to Repository (no rank, support 1-level reply)
 	avatar := user.AvatarURL
 	if avatar == "" {
 		avatar = "https://api.dicebear.com/7.x/bottts/svg?seed=" + user.Username
 	}
-	realm := user.Realm
-	if realm == "" {
-		realm = "Phàm Nhân"
-	}
 
-	comment, err := s.commentRepo.AddComment(slug, user.ID, user.Username, avatar, realm, user.Role, cleanText)
+	comment, err := s.commentRepo.AddComment(slug, user.ID, user.Username, avatar, user.Role, cleanText, req.ParentID)
 	if err != nil {
 		jsonResponse(w, http.StatusInternalServerError, map[string]string{"error": "Không thể lưu bình luận: " + err.Error()})
 		return
 	}
 
-	// 5. Reward +10 Tu Vi exp for engaging in discussion
-	_, _ = s.userRepo.AddExp(user.ID, 10)
+	msg := "Đã gửi bình luận thành công!"
+	if req.ParentID > 0 {
+		msg = "Đã gửi câu trả lời thành công!"
+	}
 
 	jsonResponse(w, http.StatusCreated, map[string]interface{}{
-		"message": "Đã gửi lời đàm đạo thành công! (+10 Tu Vi)",
+		"message": msg,
 		"comment": comment,
 	})
 }

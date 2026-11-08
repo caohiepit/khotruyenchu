@@ -64,32 +64,71 @@ func (r *CommentRepository) saveToDiskLocked() {
 	}
 }
 
-// AddComment inserts a new comment for a novel
-func (r *CommentRepository) AddComment(novelSlug, userID, username, userAvatar, userRealm, role, content string) (*domain.Comment, error) {
+// AddComment inserts a new comment or reply for a novel
+// parentID: 0 for root comments, >0 for replies. Enforces maximum 1 level of nesting.
+func (r *CommentRepository) AddComment(novelSlug, userID, username, userAvatar, role, content string, parentID int) (*domain.Comment, error) {
 	now := time.Now()
+
+	// If parentID > 0, verify root parent exists and clamp to 1 level
+	if parentID > 0 {
+		actualParentID := parentID
+		if r.dbAvailable() {
+			var pID, pParentID int
+			err := r.db.QueryRow("SELECT id, COALESCE(parent_id, 0) FROM comments WHERE id = $1 AND novel_slug = $2", parentID, novelSlug).Scan(&pID, &pParentID)
+			if err != nil {
+				if errors.Is(err, sql.ErrNoRows) {
+					return nil, errors.New("bình luận gốc không tồn tại")
+				}
+				return nil, err
+			}
+			// If replying to an existing reply, fold into the same parent root (strictly 1 level)
+			if pParentID > 0 {
+				actualParentID = pParentID
+			}
+		} else {
+			r.mu.RLock()
+			var found bool
+			for _, item := range r.items {
+				if item.ID == parentID && item.NovelSlug == novelSlug {
+					found = true
+					if item.ParentID > 0 {
+						actualParentID = item.ParentID
+					}
+					break
+				}
+			}
+			r.mu.RUnlock()
+			if !found {
+				return nil, errors.New("bình luận gốc không tồn tại")
+			}
+		}
+		parentID = actualParentID
+	} else {
+		parentID = 0
+	}
 
 	if r.dbAvailable() {
 		var id int
 		query := `
-			INSERT INTO comments (novel_slug, user_id, username, user_avatar, user_realm, role, content, likes, created_at)
+			INSERT INTO comments (novel_slug, parent_id, user_id, username, user_avatar, role, content, likes, created_at)
 			VALUES ($1, $2, $3, $4, $5, $6, $7, 0, $8)
 			RETURNING id;
 		`
-		err := r.db.QueryRow(query, novelSlug, userID, username, userAvatar, userRealm, role, content, now).Scan(&id)
+		err := r.db.QueryRow(query, novelSlug, parentID, userID, username, userAvatar, role, content, now).Scan(&id)
 		if err == nil {
 			newComment := &domain.Comment{
 				ID:         id,
 				NovelSlug:  novelSlug,
+				ParentID:   parentID,
 				UserID:     userID,
 				Username:   username,
 				UserAvatar: userAvatar,
-				UserRealm:  userRealm,
 				Role:       role,
 				Content:    content,
 				Likes:      0,
 				CreatedAt:  now,
+				Replies:    make([]domain.Comment, 0),
 			}
-			// Keep local memory/disk in sync
 			r.mu.Lock()
 			r.items = append(r.items, *newComment)
 			r.saveToDiskLocked()
@@ -105,14 +144,15 @@ func (r *CommentRepository) AddComment(novelSlug, userID, username, userAvatar, 
 	newComment := domain.Comment{
 		ID:         r.nextID,
 		NovelSlug:  novelSlug,
+		ParentID:   parentID,
 		UserID:     userID,
 		Username:   username,
 		UserAvatar: userAvatar,
-		UserRealm:  userRealm,
 		Role:       role,
 		Content:    content,
 		Likes:      0,
 		CreatedAt:  now,
+		Replies:    make([]domain.Comment, 0),
 	}
 	r.nextID++
 	r.items = append(r.items, newComment)
@@ -121,7 +161,7 @@ func (r *CommentRepository) AddComment(novelSlug, userID, username, userAvatar, 
 	return &newComment, nil
 }
 
-// GetCommentsByNovel retrieves comments for a novel ordered by newest first
+// GetCommentsByNovel retrieves top-level comments with their replies nested inside Replies (max 1 level)
 func (r *CommentRepository) GetCommentsByNovel(novelSlug string, limit, offset int) ([]domain.Comment, int, error) {
 	if limit <= 0 {
 		limit = 50
@@ -131,27 +171,23 @@ func (r *CommentRepository) GetCommentsByNovel(novelSlug string, limit, offset i
 	}
 
 	if r.dbAvailable() {
-		var total int
-		err := r.db.QueryRow("SELECT COUNT(*) FROM comments WHERE novel_slug = $1", novelSlug).Scan(&total)
+		rows, err := r.db.Query(`
+			SELECT id, novel_slug, COALESCE(parent_id, 0), user_id, username, user_avatar, role, content, likes, created_at
+			FROM comments
+			WHERE novel_slug = $1
+			ORDER BY created_at ASC
+		`, novelSlug)
 		if err == nil {
-			rows, err := r.db.Query(`
-				SELECT id, novel_slug, user_id, username, user_avatar, user_realm, role, content, likes, created_at
-				FROM comments
-				WHERE novel_slug = $1
-				ORDER BY created_at DESC
-				LIMIT $2 OFFSET $3
-			`, novelSlug, limit, offset)
-			if err == nil {
-				defer rows.Close()
-				var results []domain.Comment
-				for rows.Next() {
-					var c domain.Comment
-					if err := rows.Scan(&c.ID, &c.NovelSlug, &c.UserID, &c.Username, &c.UserAvatar, &c.UserRealm, &c.Role, &c.Content, &c.Likes, &c.CreatedAt); err == nil {
-						results = append(results, c)
-					}
+			defer rows.Close()
+			var all []domain.Comment
+			for rows.Next() {
+				var c domain.Comment
+				if err := rows.Scan(&c.ID, &c.NovelSlug, &c.ParentID, &c.UserID, &c.Username, &c.UserAvatar, &c.Role, &c.Content, &c.Likes, &c.CreatedAt); err == nil {
+					c.Replies = make([]domain.Comment, 0)
+					all = append(all, c)
 				}
-				return results, total, nil
 			}
+			return buildThreadedComments(all, limit, offset)
 		}
 	}
 
@@ -159,32 +195,65 @@ func (r *CommentRepository) GetCommentsByNovel(novelSlug string, limit, offset i
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	var matched []domain.Comment
+	var all []domain.Comment
 	for _, c := range r.items {
 		if c.NovelSlug == novelSlug {
-			matched = append(matched, c)
+			cCopy := c
+			cCopy.Replies = make([]domain.Comment, 0)
+			all = append(all, cCopy)
 		}
 	}
 
-	// Sort newest first
-	sort.Slice(matched, func(i, j int) bool {
-		return matched[i].CreatedAt.After(matched[j].CreatedAt)
+	// Sort chronological so replies line up properly
+	sort.Slice(all, func(i, j int) bool {
+		return all[i].CreatedAt.Before(all[j].CreatedAt)
 	})
 
-	total := len(matched)
-	if offset >= total {
-		return []domain.Comment{}, total, nil
+	return buildThreadedComments(all, limit, offset)
+}
+
+func buildThreadedComments(all []domain.Comment, limit, offset int) ([]domain.Comment, int, error) {
+	totalAll := len(all)
+
+	var roots []domain.Comment
+	repliesMap := make(map[int][]domain.Comment)
+
+	for _, c := range all {
+		if c.ParentID == 0 {
+			roots = append(roots, c)
+		} else {
+			repliesMap[c.ParentID] = append(repliesMap[c.ParentID], c)
+		}
+	}
+
+	// Sort root comments newest first
+	sort.Slice(roots, func(i, j int) bool {
+		return roots[i].CreatedAt.After(roots[j].CreatedAt)
+	})
+
+	// Attach replies to each root comment (already sorted oldest first)
+	for i := range roots {
+		if reps, ok := repliesMap[roots[i].ID]; ok {
+			roots[i].Replies = reps
+		} else {
+			roots[i].Replies = make([]domain.Comment, 0)
+		}
+	}
+
+	if offset >= len(roots) {
+		return []domain.Comment{}, totalAll, nil
 	}
 
 	end := offset + limit
-	if end > total {
-		end = total
+	if end > len(roots) {
+		end = len(roots)
 	}
 
-	return matched[offset:end], total, nil
+	return roots[offset:end], totalAll, nil
 }
 
 // DeleteComment removes a comment by ID if user is owner or admin
+// If target is a root comment, also removes all of its replies
 func (r *CommentRepository) DeleteComment(commentID int, userID string, isAdmin bool) error {
 	if r.dbAvailable() {
 		var ownerID string
@@ -200,20 +269,20 @@ func (r *CommentRepository) DeleteComment(commentID int, userID string, isAdmin 
 			return errors.New("bạn không có quyền xóa bình luận này")
 		}
 
-		_, err = r.db.Exec("DELETE FROM comments WHERE id = $1", commentID)
+		_, err = r.db.Exec("DELETE FROM comments WHERE id = $1 OR parent_id = $1", commentID)
 		if err != nil {
 			return err
 		}
 
-		// Also remove from local list
 		r.mu.Lock()
-		for i, c := range r.items {
-			if c.ID == commentID {
-				r.items = append(r.items[:i], r.items[i+1:]...)
-				r.saveToDiskLocked()
-				break
+		newItems := make([]domain.Comment, 0, len(r.items))
+		for _, c := range r.items {
+			if c.ID != commentID && c.ParentID != commentID {
+				newItems = append(newItems, c)
 			}
 		}
+		r.items = newItems
+		r.saveToDiskLocked()
 		r.mu.Unlock()
 		return nil
 	}
@@ -237,12 +306,18 @@ func (r *CommentRepository) DeleteComment(commentID int, userID string, isAdmin 
 		return errors.New("bình luận không tồn tại")
 	}
 
-	r.items = append(r.items[:foundIdx], r.items[foundIdx+1:]...)
+	newItems := make([]domain.Comment, 0, len(r.items))
+	for _, c := range r.items {
+		if c.ID != commentID && c.ParentID != commentID {
+			newItems = append(newItems, c)
+		}
+	}
+	r.items = newItems
 	r.saveToDiskLocked()
 	return nil
 }
 
-// LikeComment increments the like counter for a comment
+// LikeComment increments the like counter for a comment or reply
 func (r *CommentRepository) LikeComment(commentID int) (int, error) {
 	if r.dbAvailable() {
 		var newLikes int

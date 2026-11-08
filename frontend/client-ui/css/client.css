@@ -2817,49 +2817,17 @@ html[data-theme="light"] .feedback-textarea {
   color: var(--ink);
 }
 
-/* Cultivation Realm Badges */
-.comment-realm-badge {
+/* User Role Badge (Admin) - Rank badges removed */
+.comment-admin-badge {
   font-size: 0.68rem;
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 99px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
-  background: rgba(148, 163, 184, 0.15);
-  color: #64748b;
-  border: 1px solid rgba(148, 163, 184, 0.3);
-}
-
-.comment-realm-badge.realm-phuc-khi,
-.comment-realm-badge.realm-luyen-khi {
-  background: rgba(16, 185, 129, 0.12);
-  color: #10b981;
-  border-color: rgba(16, 185, 129, 0.3);
-}
-
-.comment-realm-badge.realm-truc-co {
-  background: rgba(6, 182, 212, 0.12);
-  color: #06b6d4;
-  border-color: rgba(6, 182, 212, 0.3);
-}
-
-.comment-realm-badge.realm-kim-dan {
-  background: rgba(245, 158, 11, 0.12);
-  color: #f59e0b;
-  border-color: rgba(245, 158, 11, 0.3);
-}
-
-.comment-realm-badge.realm-nguyen-anh,
-.comment-realm-badge.realm-hoa-than {
-  background: rgba(139, 92, 246, 0.12);
-  color: #8b5cf6;
-  border-color: rgba(139, 92, 246, 0.3);
-}
-
-.comment-realm-badge.realm-admin {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(245, 158, 11, 0.2));
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(245, 158, 11, 0.15));
   color: #ef4444;
-  border-color: rgba(239, 68, 68, 0.4);
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .comment-timestamp {
@@ -2922,12 +2890,13 @@ html[data-theme="dark"] .btn-comment-action:hover {
   background: rgba(255, 255, 255, 0.08);
 }
 
-.btn-comment-action.btn-like:hover {
+.btn-comment-action.btn-like:hover,
+.btn-comment-action.btn-like.liked {
   color: #ef4444;
 }
 
-.btn-comment-action.btn-like.liked {
-  color: #ef4444;
+.btn-comment-action.btn-reply:hover {
+  color: var(--brand);
 }
 
 .btn-comment-action.btn-delete {
@@ -2938,6 +2907,160 @@ html[data-theme="dark"] .btn-comment-action:hover {
 .btn-comment-action.btn-delete:hover {
   opacity: 1;
   background: rgba(239, 68, 68, 0.1);
+}
+
+/* Inline Reply Form (Tối đa 1 cấp) */
+.comment-reply-box {
+  margin-top: 12px;
+  margin-left: 46px;
+  padding: 12px 14px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (max-width: 600px) {
+  .comment-reply-box {
+    margin-left: 0;
+  }
+}
+
+.comment-reply-textarea {
+  width: 100%;
+  min-height: 64px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.88rem;
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.comment-reply-textarea:focus {
+  border-color: var(--brand);
+}
+
+.comment-reply-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.btn-reply-cancel {
+  padding: 5px 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--ink-2);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-reply-cancel:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--ink);
+}
+
+html[data-theme="dark"] .btn-reply-cancel:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.btn-reply-submit {
+  padding: 5px 14px;
+  background: var(--brand);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.2s;
+}
+
+.btn-reply-submit:hover {
+  opacity: 0.9;
+}
+
+/* 1-Level Nested Replies Thread */
+.comment-replies-list {
+  margin-top: 14px;
+  margin-left: 46px;
+  padding-left: 14px;
+  border-left: 2px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (max-width: 600px) {
+  .comment-replies-list {
+    margin-left: 10px;
+    padding-left: 8px;
+  }
+}
+
+.comment-reply-item {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.comment-reply-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--border);
+}
+
+.comment-reply-author-name {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.comment-reply-body {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 6px 0 8px;
+  padding-left: 34px;
+}
+
+@media (max-width: 600px) {
+  .comment-reply-body {
+    padding-left: 0;
+  }
+}
+
+.comment-reply-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 34px;
+}
+
+@media (max-width: 600px) {
+  .comment-reply-actions {
+    padding-left: 0;
+  }
 }
 
 /* Empty State */
