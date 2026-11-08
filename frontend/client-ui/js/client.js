@@ -4339,10 +4339,12 @@ function bindGlobalEvents() {
 
 function initSideDonateWidget() {
   const widget = document.getElementById('side-donate-widget');
+  if (!widget) return;
+
   const btnClose = document.getElementById('btn-close-donate');
   const btnTrigger = document.getElementById('btn-trigger-donate');
 
-  if (btnClose && widget) {
+  if (btnClose) {
     btnClose.addEventListener('click', () => {
       widget.classList.add('is-collapsed');
       widget.classList.remove('is-expanded');
@@ -4350,12 +4352,81 @@ function initSideDonateWidget() {
     });
   }
 
-  if (btnTrigger && widget) {
+  if (btnTrigger) {
     btnTrigger.addEventListener('click', () => {
       widget.classList.remove('is-collapsed');
       widget.classList.toggle('is-expanded');
     });
   }
+
+  let ticking = false;
+
+  function updateDonatePosition() {
+    ticking = false;
+    // Chỉ tính toán vị trí fixed trên màn hình desktop rộng (>= 1440px)
+    if (window.innerWidth < 1440) {
+      widget.style.top = '';
+      widget.style.transform = '';
+      return;
+    }
+
+    const footer = document.querySelector('.site-footer');
+    const widgetHeight = widget.offsetHeight || 500;
+    const windowHeight = window.innerHeight;
+
+    // Vị trí "ở giữa" theo chiều dọc của viewport trong phần nội dung
+    // Đảm bảo không đè lên header (cách mép trên tối thiểu 90px)
+    const idealTop = Math.max(90, Math.round((windowHeight - widgetHeight) / 2));
+
+    if (footer) {
+      const footerRect = footer.getBoundingClientRect();
+      const margin = 24; // Khoảng cách đệm an toàn không cho widget trùm lên footer
+      // Ngưỡng top tối đa cho phép trước khi chạm mép trên của footer
+      const maxAllowedTop = Math.round(footerRect.top - widgetHeight - margin);
+
+      if (maxAllowedTop < idealTop) {
+        widget.style.top = `${maxAllowedTop}px`;
+        widget.style.transform = 'none';
+        return;
+      }
+    }
+
+    widget.style.top = `${idealTop}px`;
+    widget.style.transform = 'none';
+  }
+
+  function requestPositionUpdate() {
+    if (!ticking) {
+      requestAnimationFrame(updateDonatePosition);
+      ticking = true;
+    }
+  }
+
+  window.addEventListener('scroll', requestPositionUpdate, { passive: true });
+  window.addEventListener('resize', requestPositionUpdate, { passive: true });
+
+  if (window.ResizeObserver) {
+    const ro = new ResizeObserver(() => {
+      requestPositionUpdate();
+    });
+    ro.observe(document.body);
+  }
+
+  window.addEventListener('hashchange', () => {
+    setTimeout(requestPositionUpdate, 100);
+  });
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('scroll') === 'bottom') {
+    const scrollToBottom = () => {
+      window.scrollTo(0, document.documentElement.scrollHeight);
+      requestPositionUpdate();
+    };
+    setTimeout(scrollToBottom, 300);
+    setTimeout(scrollToBottom, 800);
+  }
+
+  requestPositionUpdate();
 }
 
 function initFeedbackForm() {

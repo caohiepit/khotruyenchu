@@ -2001,12 +2001,14 @@ html[data-theme="dark"] .side-donate-widget {
 @media (min-width: 1440px) {
   .side-donate-widget {
     position: fixed;
-    top: 95px;
+    top: 50%;
+    transform: translateY(-50%);
     left: max(16px, calc((100vw - var(--container-max)) / 2 - 325px));
     width: 300px;
     padding: 20px 18px;
     z-index: 99;
     text-align: center;
+    will-change: top;
   }
   .side-donate-body {
     display: flex;
